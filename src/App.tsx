@@ -1,3 +1,4 @@
+import { Suspense, lazy } from 'react';
 import { ThemeProvider, CssBaseline, Box } from '@mui/material';
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from "@vercel/speed-insights/react"
@@ -5,14 +6,15 @@ import theme from './theme';
 import { LanguageProvider } from './contexts/LanguageContext';
 import Header from './components/Header';
 import Hero from './components/Hero';
-import Promo from './components/Promo';
-import About from './components/About';
-import Videos from './components/Videos';
-import Partnerships from './components/Partnerships';
-import Recommendations from './components/Recommendations';
-import Contact from './components/Contact';
-import Footer from './components/Footer';
-import BackToTop from './components/BackToTop';
+
+const Promo = lazy(() => import('./components/Promo'));
+const About = lazy(() => import('./components/About'));
+const Videos = lazy(() => import('./components/Videos'));
+const Partnerships = lazy(() => import('./components/Partnerships'));
+const Recommendations = lazy(() => import('./components/Recommendations'));
+const Contact = lazy(() => import('./components/Contact'));
+const Footer = lazy(() => import('./components/Footer'));
+const BackToTop = lazy(() => import('./components/BackToTop'));
 
 export default function App() {
   return (
@@ -23,14 +25,16 @@ export default function App() {
         <Header />
         <Box sx={{ pt: { xs: '56px', sm: '64px' } }} />
         <Hero />
-        <Promo />
-        <About />
-        <Videos />
-        <Partnerships />
-        <Recommendations />
-        <Contact />
-        <Footer />
-        <BackToTop />
+        <Suspense fallback={null}>
+          <Promo />
+          <About />
+          <Videos />
+          <Partnerships />
+          <Recommendations />
+          <Contact />
+          <Footer />
+          <BackToTop />
+        </Suspense>
         <Analytics />
         <SpeedInsights />
       </Box>

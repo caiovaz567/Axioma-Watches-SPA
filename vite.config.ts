@@ -89,5 +89,14 @@ export default defineConfig(({ mode }) => {
     server: {
       host: true,
     },
+    build: {
+      rollupOptions: {
+        output: {
+          manualChunks: {
+            'mui-vendor': ['@mui/material', '@mui/icons-material', '@emotion/react', '@emotion/styled'],
+          },
+        },
+      },
+    },
   }
 })
