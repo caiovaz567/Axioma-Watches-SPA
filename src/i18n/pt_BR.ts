@@ -68,14 +68,6 @@ const pt_BR: Translations = {
     visitSite: 'VER SITE',
     tooltipCopy: 'Toque para copiar o cupom',
     tooltipCopied: 'Cupom copiado!',
-    brands: {
-      impala: {
-        description: 'Review completo do relógio SPINNAKER modelo SP-5068-03 HULL — Uma marca Inglesa que produz modelos inspirados em elementos marinhos e náuticos.',
-      },
-      terranova: {
-        description: 'Conteúdo especial em parceria com a Terranova Watches — Uma Micro Brand que despontou no cenário nacional em 2024 e vem conquistando o coração dos amantes da boa relojoaria.',
-      },
-    },
   },
   contact: {
     label: 'CONTATO',
