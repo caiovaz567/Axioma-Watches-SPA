@@ -30,6 +30,7 @@ const PARTNERSHIPS: Partnership[] = [
   {
     name: 'Relojoaria Impala',
     description: 'Review completo do relógio SPINNAKER modelo SP-5068-03 HULL — Uma marca Inglesa que produz modelos inspirados em elementos marinhos e náuticos.',
+    descriptionEn: 'Full review of the SPINNAKER watch model SP-5068-03 HULL — An English brand that produces models inspired by marine and nautical elements.',
     videoUrl: 'https://youtu.be/Zhbrgj9DH_4',
     videoId: 'Zhbrgj9DH_4',
     websiteUrl: 'https://www.relojoariaimpala.com.br/',
@@ -41,6 +42,7 @@ const PARTNERSHIPS: Partnership[] = [
   {
     name: 'Terranova Watches',
     description: 'Conteúdo especial em parceria com a Terranova Watches — Uma Micro Brand que despontou no cenário nacional em 2024 e vem conquistando o coração dos amantes da boa relojoaria.',
+    descriptionEn: 'Special content in partnership with Terranova Watches — A Micro Brand that emerged on the national scene in 2024, winning the hearts of fine watchmaking enthusiasts.',
     videoUrl: 'https://youtu.be/BWQ7Jckc_ok',
     videoId: 'BWQ7Jckc_ok',
     websiteUrl: 'https://terranovawatches.com/',
@@ -52,6 +54,7 @@ const PARTNERSHIPS: Partnership[] = [
   {
     name: 'Roue Watch',
     description: 'Parceria com a Roue Watch — marca brasileira de relógios que une design contemporâneo e qualidade artesanal, conquistando cada vez mais entusiastas da relojoaria nacional.',
+    descriptionEn: 'Partnership with Roue Watch — a Brazilian watch brand that combines contemporary design and artisanal quality, winning over more and more fine watchmaking enthusiasts.',
     videoUrl: 'https://youtu.be/RJU5YsRYHcQ',
     videoId: 'RJU5YsRYHcQ',
     websiteUrl: 'https://rouewatch.com.br/',
