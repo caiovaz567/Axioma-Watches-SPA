@@ -29,8 +29,8 @@ interface Partnership {
 const PARTNERSHIPS: Partnership[] = [
   {
     name: 'Relojoaria Impala',
-    description: 'Review completo do relógio SPINNAKER modelo SP-5068-03 HULL — Uma marca Inglesa que produz modelos inspirados em elementos marinhos e náuticos.',
-    descriptionEn: 'Full review of the SPINNAKER watch model SP-5068-03 HULL — An English brand that produces models inspired by marine and nautical elements.',
+    description: 'Com 50 anos de história, a Relojoaria IMPALA é referência em relojoaria no Brasil, unindo tradição, curadoria criteriosa e uma experiência de compra cinco estrelas. Trabalhando com as principais marcas e acreditando que um relógio vai além de marcar o tempo: ele carrega identidade, história e propósito. O compromisso da IMPALA é oferecer conhecimento, confiança e excelência em cada detalhe — da escolha do relógio ao pós-venda!',
+    descriptionEn: 'With 50 years of history, Relojoaria IMPALA is a benchmark in watchmaking in Brazil, combining tradition, careful curation, and a five-star shopping experience. Working with the leading brands and believing that a watch goes beyond telling time: it carries identity, history, and purpose. IMPALA is committed to offering knowledge, trust, and excellence in every detail — from choosing the watch to after-sales service!',
     videoUrl: 'https://youtu.be/Zhbrgj9DH_4',
     videoId: 'Zhbrgj9DH_4',
     websiteUrl: 'https://www.relojoariaimpala.com.br/',
@@ -41,8 +41,8 @@ const PARTNERSHIPS: Partnership[] = [
   },
   {
     name: 'Terranova Watches',
-    description: 'Conteúdo especial em parceria com a Terranova Watches — Uma Micro Brand que despontou no cenário nacional em 2024 e vem conquistando o coração dos amantes da boa relojoaria.',
-    descriptionEn: 'Special content in partnership with Terranova Watches — A Micro Brand that emerged on the national scene in 2024, winning the hearts of fine watchmaking enthusiasts.',
+    description: 'Autenticidade, brasilidade e pertencimento. Terra Nova é uma marca brasileira de relógios que escolhe olhar para o Brasil com profundidade, acreditando na riqueza cultural do país não como imagem pronta, mas como campo de exploração contínua. A Terra Nova desenvolve relógios autorais, com design inédito e engenharia confiável, pensados para representar o Brasil real: plural, sofisticado e em constante movimento. Alguns são os relógios que trazem consigo uma história, mas poucos são os que nos ajudam a contar a nossa.',
+    descriptionEn: 'Authenticity, Brazilianness, and belonging. Terra Nova is a Brazilian watch brand that chooses to look deeply at Brazil, believing in the country’s cultural richness not as a finished image, but as a field of continuous exploration. Terra Nova develops original watches with unique design and reliable engineering, created to represent the real Brazil: plural, sophisticated, and in constant motion. Some watches carry a story with them, but few help us tell our own.',
     videoUrl: 'https://youtu.be/BWQ7Jckc_ok',
     videoId: 'BWQ7Jckc_ok',
     websiteUrl: 'https://terranovawatches.com/',
@@ -53,8 +53,8 @@ const PARTNERSHIPS: Partnership[] = [
   },
   {
     name: 'Roue Watch',
-    description: 'Parceria com a Roue Watch — marca brasileira de relógios que une design contemporâneo e qualidade artesanal, conquistando cada vez mais entusiastas da relojoaria nacional.',
-    descriptionEn: 'Partnership with Roue Watch — a Brazilian watch brand that combines contemporary design and artisanal quality, winning over more and more fine watchmaking enthusiasts.',
+    description: 'Inspirada pela era mais bela dos relógios, a marca traduz esse espírito de design neo-vintage e acabamento contemporâneo, guiados por proporção, autenticidade e movimento. Mais do que medir o tempo, é sobre viver o instante com estilo e presença.',
+    descriptionEn: 'Inspired by the most beautiful era of watches, the brand translates that spirit into neo-vintage design and contemporary finishing, guided by proportion, authenticity, and movement. More than measuring time, it is about living the moment with style and presence.',
     videoUrl: 'https://youtu.be/RJU5YsRYHcQ',
     videoId: 'RJU5YsRYHcQ',
     websiteUrl: 'https://rouewatch.com.br/',
