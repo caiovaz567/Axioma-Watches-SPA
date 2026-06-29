@@ -1,65 +1,350 @@
-import { useState } from 'react';
-import { Box, Typography, Tooltip } from '@mui/material';
+import { useState, useRef, useEffect, useCallback } from 'react';
+import { Box, Typography, Tooltip, IconButton } from '@mui/material';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import CloseIcon from '@mui/icons-material/Close';
 import CheckIcon from '@mui/icons-material/Check';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import impalaImg from '../assets/banner-empresa-1170x305.jpg';
 import terranovaImg from '../assets/d86c3fa9-b022-4d13-91d7-b2246a746426_logo-azul-jpg.jpg';
+import roueImg from '../assets/roue_logo.svg';
 import { useScrollReveal, revealSx } from '../hooks/useScrollReveal';
 import { useLanguage } from '../contexts/LanguageContext';
+
+interface Partnership {
+  name: string;
+  description: string;
+  descriptionEn?: string;
+  videoUrl: string;
+  videoId: string;
+  websiteUrl: string;
+  coupon: string;
+  imageUrl?: string;
+  imageFit?: 'cover' | 'contain';
+  imageBg?: string;
+}
+
+const PARTNERSHIPS: Partnership[] = [
+  {
+    name: 'Relojoaria Impala',
+    description: 'Com 50 anos de história, a Relojoaria IMPALA é referência em relojoaria no Brasil, unindo tradição, curadoria criteriosa e uma experiência de compra cinco estrelas. Trabalhando com as principais marcas e acreditando que um relógio vai além de marcar o tempo: ele carrega identidade, história e propósito. O compromisso da IMPALA é oferecer conhecimento, confiança e excelência em cada detalhe — da escolha do relógio ao pós-venda!',
+    descriptionEn: 'With 50 years of history, Relojoaria IMPALA is a benchmark in watchmaking in Brazil, combining tradition, careful curation, and a five-star shopping experience. Working with the leading brands and believing that a watch goes beyond telling time: it carries identity, history, and purpose. IMPALA is committed to offering knowledge, trust, and excellence in every detail — from choosing the watch to after-sales service!',
+    videoUrl: 'https://youtu.be/Zhbrgj9DH_4',
+    videoId: 'Zhbrgj9DH_4',
+    websiteUrl: 'https://www.relojoariaimpala.com.br/',
+    coupon: 'axioma',
+    imageUrl: impalaImg,
+    imageFit: 'contain',
+    imageBg: '#000',
+  },
+  {
+    name: 'Terranova Watches',
+    description: 'Autenticidade, brasilidade e pertencimento. Terra Nova é uma marca brasileira de relógios que escolhe olhar para o Brasil com profundidade, acreditando na riqueza cultural do país não como imagem pronta, mas como campo de exploração contínua. A Terra Nova desenvolve relógios autorais, com design inédito e engenharia confiável, pensados para representar o Brasil real: plural, sofisticado e em constante movimento. Alguns são os relógios que trazem consigo uma história, mas poucos são os que nos ajudam a contar a nossa.',
+    descriptionEn: 'Authenticity, Brazilianness, and belonging. Terra Nova is a Brazilian watch brand that chooses to look deeply at Brazil, believing in the country’s cultural richness not as a finished image, but as a field of continuous exploration. Terra Nova develops original watches with unique design and reliable engineering, created to represent the real Brazil: plural, sophisticated, and in constant motion. Some watches carry a story with them, but few help us tell our own.',
+    videoUrl: 'https://youtu.be/BWQ7Jckc_ok',
+    videoId: 'BWQ7Jckc_ok',
+    websiteUrl: 'https://terranovawatches.com/',
+    coupon: 'axioma',
+    imageUrl: terranovaImg,
+    imageFit: 'contain',
+    imageBg: '#fff',
+  },
+  {
+    name: 'Roue Watch',
+    description: 'Inspirada pela era mais bela dos relógios, a marca traduz esse espírito de design neo-vintage e acabamento contemporâneo, guiados por proporção, autenticidade e movimento. Mais do que medir o tempo, é sobre viver o instante com estilo e presença.',
+    descriptionEn: 'Inspired by the most beautiful era of watches, the brand translates that spirit into neo-vintage design and contemporary finishing, guided by proportion, authenticity, and movement. More than measuring time, it is about living the moment with style and presence.',
+    videoUrl: 'https://youtu.be/RJU5YsRYHcQ',
+    videoId: 'RJU5YsRYHcQ',
+    websiteUrl: 'https://rouewatch.com.br/',
+    coupon: 'axioma',
+    imageUrl: roueImg,
+    imageFit: 'contain',
+    imageBg: '#111',
+  },
+];
+
+function PartnershipCard({ p }: { p: Partnership }) {
+  const [playing, setPlaying] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const { t, lang } = useLanguage();
+  const description = lang === 'en' && p.descriptionEn ? p.descriptionEn : p.description;
+  const thumbnail = p.imageUrl ?? (p.videoId ? `https://img.youtube.com/vi/${p.videoId}/maxresdefault.jpg` : '');
+
+  const handleCopy = () => {
+    if (!p.coupon) return;
+    const fallback = () => {
+      const ta = document.createElement('textarea');
+      ta.value = p.coupon;
+      ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0;pointer-events:none';
+      document.body.appendChild(ta);
+      ta.focus();
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+    };
+    if (navigator.clipboard?.writeText) {
+      navigator.clipboard.writeText(p.coupon).catch(fallback);
+    } else {
+      fallback();
+    }
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2500);
+  };
+
+  return (
+    <Box sx={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
+      {/* Video area */}
+      <Box
+        sx={{
+          position: 'relative',
+          aspectRatio: '16/9',
+          borderRadius: 2,
+          overflow: 'hidden',
+          backgroundColor: p.imageBg ?? '#000',
+          flexShrink: 0,
+        }}
+      >
+        {playing ? (
+          <>
+            <Box
+              component="iframe"
+              src={`https://www.youtube.com/embed/${p.videoId}?autoplay=1&rel=0`}
+              title={p.name}
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+              sx={{ position: 'absolute', inset: 0, width: '100%', height: '100%', border: 'none' }}
+            />
+            <Box
+              onClick={() => setPlaying(false)}
+              role="button"
+              aria-label="Fechar vídeo"
+              sx={{
+                position: 'absolute', top: 8, right: 8,
+                width: 32, height: 32, borderRadius: '50%',
+                backgroundColor: 'rgba(0,0,0,0.7)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                cursor: 'pointer', zIndex: 2,
+                transition: 'background-color 0.2s',
+                '&:hover': { backgroundColor: 'rgba(0,0,0,0.9)' },
+              }}
+            >
+              <CloseIcon sx={{ fontSize: '1rem', color: '#fff' }} />
+            </Box>
+          </>
+        ) : (
+          <>
+            {thumbnail && (
+              <Box
+                component="img"
+                src={thumbnail}
+                alt={p.name}
+                sx={{
+                  position: 'absolute', inset: 0,
+                  width: '100%', height: '100%',
+                  objectFit: p.imageFit ?? 'cover',
+                  objectPosition: 'center',
+                  backgroundColor: p.imageBg ?? 'transparent',
+                  ...(p.imageFit === 'contain' && { padding: '20px' }),
+                  transition: 'transform 0.45s ease, filter 0.45s ease',
+                  transformOrigin: 'center',
+                  '.partnership-card:hover &': { transform: 'scale(1.04)', filter: 'brightness(0.75)' },
+                }}
+              />
+            )}
+            <Box
+              className="partnership-card"
+              onClick={() => setPlaying(true)}
+              role="button"
+              aria-label={`Reproduzir vídeo ${p.name}`}
+              sx={{
+                position: 'absolute', inset: 0,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                cursor: 'pointer',
+                '&:hover .play-btn': { transform: 'scale(1.1)' },
+              }}
+            >
+              <Box
+                className="play-btn"
+                sx={{
+                  width: 56, height: 56, borderRadius: '50%',
+                  backgroundColor: 'rgba(201,168,76,0.92)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  boxShadow: '0 4px 20px rgba(0,0,0,0.5)',
+                  transition: 'transform 0.2s',
+                }}
+              >
+                <PlayArrowIcon sx={{ color: '#0D0E11', fontSize: '1.9rem' }} />
+              </Box>
+            </Box>
+            <Box sx={{ position: 'absolute', top: 0, left: 0, right: 0, height: '2px', background: 'linear-gradient(to right, transparent, rgba(201,168,76,0.8), transparent)' }} />
+          </>
+        )}
+      </Box>
+
+      {/* Content */}
+      <Box sx={{ mt: 2.5, display: 'flex', flexDirection: 'column', flex: 1, px: 0.5 }}>
+        <Typography
+          sx={{
+            fontFamily: '"Inter", sans-serif',
+            fontSize: '1.05rem',
+            fontWeight: 600,
+            color: '#EBEBEB',
+            mb: 1,
+          }}
+        >
+          {p.name}
+        </Typography>
+
+        <Box sx={{ flex: 1, minHeight: '4.5rem' }}>
+          {description && (
+            <Typography
+              variant="body2"
+              sx={{ color: 'text.secondary', lineHeight: 1.75, fontSize: '0.875rem', mb: 2.5 }}
+            >
+              {description}
+            </Typography>
+          )}
+        </Box>
+
+        {p.coupon && (
+          <Tooltip
+            title={copied ? t.partnerships.tooltipCopied : t.partnerships.tooltipCopy}
+            placement="top"
+          >
+            <Box
+              onClick={handleCopy}
+              role="button"
+              aria-label={`Copiar cupom ${p.coupon}`}
+              sx={{
+                display: 'inline-flex', alignItems: 'center', gap: 1,
+                px: 1.75, py: 1,
+                borderRadius: '6px', mb: 2.5, alignSelf: 'flex-start',
+                border: '1px solid',
+                borderColor: copied ? 'success.main' : 'rgba(201,168,76,0.4)',
+                backgroundColor: copied ? 'rgba(76,175,80,0.08)' : 'rgba(201,168,76,0.04)',
+                cursor: 'pointer', userSelect: 'none',
+                transition: 'border-color 0.2s, background-color 0.2s, transform 0.1s',
+                minHeight: 40,
+                '&:hover': {
+                  borderColor: copied ? 'success.main' : 'primary.main',
+                  backgroundColor: copied ? 'rgba(76,175,80,0.12)' : 'rgba(201,168,76,0.08)',
+                },
+                '&:active': { transform: 'scale(0.97)' },
+              }}
+            >
+              {copied ? (
+                <>
+                  <CheckIcon sx={{ fontSize: '0.85rem', color: 'success.main' }} />
+                  <Typography sx={{ fontSize: '0.72rem', letterSpacing: '0.14em', color: 'success.main', fontFamily: '"Inter", sans-serif', fontWeight: 600 }}>
+                    {t.partnerships.copied}
+                  </Typography>
+                </>
+              ) : (
+                <>
+                  <Typography sx={{ fontSize: '0.62rem', letterSpacing: '0.18em', color: 'text.secondary', fontFamily: '"Inter", sans-serif', fontWeight: 500 }}>
+                    {t.partnerships.couponLabel}
+                  </Typography>
+                  <Typography sx={{ fontSize: '0.82rem', letterSpacing: '0.2em', color: 'primary.main', fontFamily: '"Inter", sans-serif', fontWeight: 700 }}>
+                    {p.coupon.toUpperCase()}
+                  </Typography>
+                  <ContentCopyIcon sx={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.3)' }} />
+                </>
+              )}
+            </Box>
+          </Tooltip>
+        )}
+
+        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3, alignItems: 'center' }}>
+          <Box
+            component="a" href={p.videoUrl} target="_blank" rel="noopener noreferrer"
+            sx={{
+              display: 'inline-flex', alignItems: 'center', gap: 0.75,
+              color: 'primary.main', textDecoration: 'none',
+              fontSize: '0.7rem', letterSpacing: '0.15em',
+              fontFamily: '"Inter", sans-serif', fontWeight: 500,
+              borderBottom: '1px solid rgba(201,168,76,0.3)', pb: 0.5,
+              transition: 'border-color 0.2s',
+              '&:hover': { borderColor: 'primary.main' },
+            }}
+          >
+            <PlayArrowIcon sx={{ fontSize: '0.9rem' }} />
+            {t.partnerships.watchVideo}
+          </Box>
+          <Box
+            component="a" href={p.websiteUrl} target="_blank" rel="noopener noreferrer"
+            sx={{
+              display: 'inline-flex', alignItems: 'center', gap: 0.75,
+              color: 'text.secondary', textDecoration: 'none',
+              fontSize: '0.7rem', letterSpacing: '0.15em',
+              fontFamily: '"Inter", sans-serif', fontWeight: 500,
+              borderBottom: '1px solid rgba(255,255,255,0.1)', pb: 0.5,
+              transition: 'color 0.2s, border-color 0.2s',
+              '&:hover': { color: '#EBEBEB', borderColor: 'rgba(255,255,255,0.3)' },
+            }}
+          >
+            <OpenInNewIcon sx={{ fontSize: '0.85rem' }} />
+            {t.partnerships.visitSite}
+          </Box>
+        </Box>
+      </Box>
+    </Box>
+  );
+}
+
+const arrowSx = (enabled: boolean) => ({
+  flexShrink: 0,
+  display: { xs: 'none', md: 'flex' },
+  color: enabled ? 'primary.main' : 'rgba(255,255,255,0.15)',
+  border: '1px solid',
+  borderColor: enabled ? 'rgba(201,168,76,0.4)' : 'rgba(255,255,255,0.08)',
+  borderRadius: '50%',
+  width: 44,
+  height: 44,
+  transition: 'all 0.2s',
+  '&:hover:not(:disabled)': {
+    borderColor: 'primary.main',
+    backgroundColor: 'rgba(201,168,76,0.08)',
+  },
+  '&.Mui-disabled': {
+    color: 'rgba(255,255,255,0.15)',
+    borderColor: 'rgba(255,255,255,0.08)',
+  },
+});
 
 export default function Partnerships() {
   const { ref, visible } = useScrollReveal();
   const { t } = useLanguage();
-  const [copied, setCopied] = useState<string | null>(null);
-  const [playing, setPlaying] = useState<string | null>(null);
+  const trackRef = useRef<HTMLDivElement>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
 
-  const partnerships = [
-    {
-      image: impalaImg,
-      brand: 'Relojoaria Impala',
-      description: t.partnerships.brands.impala.description,
-      videoId: 'Zhbrgj9DH_4',
-      videoUrl: 'https://youtu.be/Zhbrgj9DH_4',
-      websiteUrl: 'https://www.relojoariaimpala.com.br/',
-      coupon: 'axioma',
-      imageFit: 'contain' as const,
-      imageBg: '#000',
-    },
-    {
-      image: terranovaImg,
-      brand: 'Terranova Watches',
-      description: t.partnerships.brands.terranova.description,
-      videoId: 'BWQ7Jckc_ok',
-      videoUrl: 'https://youtu.be/BWQ7Jckc_ok',
-      websiteUrl: 'https://terranovawatches.com/',
-      coupon: 'axioma',
-      imageFit: 'contain' as const,
-      imageBg: '#fff',
-    },
-  ];
+  const updateScrollState = useCallback(() => {
+    const el = trackRef.current;
+    if (!el) return;
+    setCanScrollLeft(el.scrollLeft > 1);
+    setCanScrollRight(el.scrollLeft < el.scrollWidth - el.clientWidth - 1);
+  }, []);
 
-  const handleCopy = (brand: string, coupon: string) => {
-    const fallback = () => {
-      const textarea = document.createElement('textarea');
-      textarea.value = coupon;
-      textarea.style.cssText = 'position:fixed;top:0;left:0;opacity:0;pointer-events:none';
-      document.body.appendChild(textarea);
-      textarea.focus();
-      textarea.select();
-      document.execCommand('copy');
-      document.body.removeChild(textarea);
+  useEffect(() => {
+    const el = trackRef.current;
+    if (!el) return;
+    const raf = requestAnimationFrame(updateScrollState);
+    el.addEventListener('scroll', updateScrollState, { passive: true });
+    const ro = new ResizeObserver(updateScrollState);
+    ro.observe(el);
+    return () => {
+      cancelAnimationFrame(raf);
+      el.removeEventListener('scroll', updateScrollState);
+      ro.disconnect();
     };
+  }, [updateScrollState]);
 
-    if (navigator.clipboard?.writeText) {
-      navigator.clipboard.writeText(coupon).catch(fallback);
-    } else {
-      fallback();
-    }
-
-    setCopied(brand);
-    setTimeout(() => setCopied(null), 2500);
+  const scroll = (dir: 'left' | 'right') => {
+    const el = trackRef.current;
+    if (!el) return;
+    el.scrollBy({ left: dir === 'left' ? -el.clientWidth : el.clientWidth, behavior: 'smooth' });
   };
 
   return (
@@ -69,10 +354,9 @@ export default function Partnerships() {
         backgroundColor: '#0D0E11',
         borderTop: '1px solid rgba(201,168,76,0.08)',
         py: { xs: 10, md: 14 },
-        px: { xs: 4, sm: 6, md: 8 },
       }}
     >
-      <Box ref={ref} sx={{ maxWidth: 1200, mx: 'auto' }}>
+      <Box ref={ref} sx={{ maxWidth: 1600, mx: 'auto', px: { xs: 4, sm: 6, md: 6 } }}>
 
         <Box sx={{ mb: { xs: 8, md: 10 }, textAlign: 'center' }}>
           <Typography
@@ -114,151 +398,55 @@ export default function Partnerships() {
           </Typography>
         </Box>
 
-        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 3 }}>
-          {partnerships.map((p, i) => (
+        <Box
+          sx={{
+            ...revealSx(visible, 300),
+            display: 'flex',
+            alignItems: 'center',
+            gap: { md: 2 },
+          }}
+        >
+          <IconButton onClick={() => scroll('left')} disabled={!canScrollLeft} sx={arrowSx(canScrollLeft)}>
+            <ChevronLeftIcon />
+          </IconButton>
+
+          <Box sx={{ overflow: 'hidden', flex: 1, mx: { xs: -4, sm: -6, md: 0 } }}>
             <Box
-              key={p.brand}
+              ref={trackRef}
               sx={{
-                ...revealSx(visible, 320 + i * 150),
                 display: 'flex',
-                flexDirection: 'column',
-                border: '1px solid rgba(201,168,76,0.12)',
-                borderRadius: 2,
-                overflow: 'hidden',
-                backgroundColor: 'rgba(255,255,255,0.02)',
-                transition: 'border-color 0.3s, box-shadow 0.3s',
-                '&:hover': {
-                  borderColor: 'rgba(201,168,76,0.35)',
-                  boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
-                },
+                overflowX: 'auto',
+                scrollSnapType: 'x mandatory',
+                '&::-webkit-scrollbar': { display: 'none' },
+                msOverflowStyle: 'none',
+                scrollbarWidth: 'none',
+                px: { xs: 4, sm: 6, md: 0 },
+                scrollPaddingLeft: { xs: '32px', sm: '48px', md: '0px' },
               }}
             >
-              <Box sx={{ position: 'relative', height: 220, backgroundColor: '#000', overflow: 'hidden', flexShrink: 0 }}>
-                {playing === p.brand ? (
-                  <>
-                    <Box
-                      component="iframe"
-                      src={`https://www.youtube.com/embed/${p.videoId}?autoplay=1&rel=0`}
-                      title={p.brand}
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                      allowFullScreen
-                      sx={{ position: 'absolute', inset: 0, width: '100%', height: '100%', border: 'none' }}
-                    />
-                    <Box
-                      onClick={() => setPlaying(null)}
-                      role="button"
-                      aria-label="Fechar vídeo"
-                      sx={{
-                        position: 'absolute', top: 8, right: 8, width: 32, height: 32,
-                        borderRadius: '50%', backgroundColor: 'rgba(0,0,0,0.7)',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        cursor: 'pointer', zIndex: 2, transition: 'background-color 0.2s',
-                        '&:hover': { backgroundColor: 'rgba(0,0,0,0.9)' },
-                      }}
-                    >
-                      <CloseIcon sx={{ fontSize: '1rem', color: '#fff' }} />
-                    </Box>
-                  </>
-                ) : (
-                  <>
-                    <Box
-                      component="img"
-                      src={p.image}
-                      alt={p.brand}
-                      sx={{
-                        width: '100%', height: '100%',
-                        objectFit: p.imageFit, objectPosition: 'center',
-                        ...(p.imageFit === 'contain' && { padding: '24px', backgroundColor: p.imageBg }),
-                        transition: 'transform 0.5s ease',
-                        '.MuiBox-root:hover &': { transform: 'scale(1.04)' },
-                      }}
-                    />
-                    <Box sx={{ position: 'absolute', top: 0, left: 0, right: 0, height: '2px', background: 'linear-gradient(to right, transparent, rgba(201,168,76,0.8), transparent)' }} />
-                    <Box
-                      onClick={() => setPlaying(p.brand)}
-                      role="button"
-                      aria-label={`Reproduzir vídeo ${p.brand}`}
-                      sx={{
-                        position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        opacity: 0, backgroundColor: 'rgba(0,0,0,0.45)', transition: 'opacity 0.25s', cursor: 'pointer',
-                        '.MuiBox-root:hover &': { opacity: 1 },
-                      }}
-                    >
-                      <Box sx={{ width: 56, height: 56, borderRadius: '50%', backgroundColor: 'rgba(201,168,76,0.92)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 20px rgba(0,0,0,0.5)', transition: 'transform 0.2s', '&:hover': { transform: 'scale(1.1)' } }}>
-                        <PlayArrowIcon sx={{ color: '#0D0E11', fontSize: '1.9rem' }} />
-                      </Box>
-                    </Box>
-                  </>
-                )}
-              </Box>
-
-              <Box sx={{ p: { xs: 3, md: 4 }, display: 'flex', flexDirection: 'column', flex: 1 }}>
-                <Typography variant="h6" sx={{ color: '#EBEBEB', fontFamily: '"Inter", sans-serif', fontSize: '1.1rem', fontWeight: 600, mb: 1.5 }}>
-                  {p.brand}
-                </Typography>
-
-                <Typography variant="body2" sx={{ color: 'text.secondary', lineHeight: 1.8, fontSize: '0.875rem', mb: 3, flex: 1 }}>
-                  {p.description}
-                </Typography>
-
-                <Tooltip title={copied === p.brand ? t.partnerships.tooltipCopied : t.partnerships.tooltipCopy} placement="top">
-                  <Box
-                    onClick={() => handleCopy(p.brand, p.coupon)}
-                    role="button"
-                    aria-label={`Copiar cupom ${p.coupon}`}
-                    sx={{
-                      display: 'inline-flex', alignItems: 'center', gap: 1.5,
-                      border: '1px solid', borderColor: copied === p.brand ? 'success.main' : 'rgba(201,168,76,0.4)',
-                      borderRadius: '6px', px: 2, py: 1.25, mb: 3, alignSelf: 'flex-start',
-                      backgroundColor: copied === p.brand ? 'rgba(76,175,80,0.08)' : 'rgba(201,168,76,0.04)',
-                      cursor: 'pointer', userSelect: 'none',
-                      transition: 'border-color 0.2s, background-color 0.2s, transform 0.1s',
-                      minHeight: 44,
-                      '&:hover': { borderColor: copied === p.brand ? 'success.main' : 'primary.main', backgroundColor: copied === p.brand ? 'rgba(76,175,80,0.12)' : 'rgba(201,168,76,0.08)' },
-                      '&:active': { transform: 'scale(0.97)' },
-                    }}
-                  >
-                    {copied === p.brand ? (
-                      <>
-                        <CheckIcon sx={{ fontSize: '1rem', color: 'success.main' }} />
-                        <Typography sx={{ fontSize: '0.75rem', letterSpacing: '0.12em', color: 'success.main', fontFamily: '"Inter", sans-serif', fontWeight: 600 }}>
-                          {t.partnerships.copied}
-                        </Typography>
-                      </>
-                    ) : (
-                      <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 1.5 }}>
-                        <Typography sx={{ fontSize: '0.70rem', letterSpacing: '0.18em', color: 'text.secondary', fontFamily: '"Inter", sans-serif', fontWeight: 500 }}>
-                          {t.partnerships.couponLabel}
-                        </Typography>
-                        <Typography sx={{ fontSize: '0.9rem', letterSpacing: '0.2em', color: 'primary.main', fontFamily: '"Inter", sans-serif', fontWeight: 700 }}>
-                          {p.coupon}
-                        </Typography>
-                      </Box>
-                    )}
-                  </Box>
-                </Tooltip>
-
-                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3, alignItems: 'center' }}>
-                  <Box
-                    component="a" href={p.videoUrl} target="_blank" rel="noopener noreferrer"
-                    sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.75, color: 'primary.main', textDecoration: 'none', fontSize: '0.72rem', letterSpacing: '0.15em', fontFamily: '"Inter", sans-serif', fontWeight: 500, borderBottom: '1px solid rgba(201,168,76,0.3)', pb: 0.5, transition: 'border-color 0.2s', '&:hover': { borderColor: 'primary.main' } }}
-                  >
-                    <PlayArrowIcon sx={{ fontSize: '0.9rem' }} />
-                    {t.partnerships.watchVideo}
-                  </Box>
-
-                  <Box
-                    component="a" href={p.websiteUrl} target="_blank" rel="noopener noreferrer"
-                    sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.75, color: 'text.secondary', textDecoration: 'none', fontSize: '0.72rem', letterSpacing: '0.15em', fontFamily: '"Inter", sans-serif', fontWeight: 500, borderBottom: '1px solid rgba(255,255,255,0.1)', pb: 0.5, transition: 'color 0.2s, border-color 0.2s', '&:hover': { color: '#EBEBEB', borderColor: 'rgba(255,255,255,0.3)' } }}
-                  >
-                    <OpenInNewIcon sx={{ fontSize: '0.85rem' }} />
-                    {t.partnerships.visitSite}
-                  </Box>
+              {PARTNERSHIPS.map((p, i) => (
+                <Box
+                  key={i}
+                  sx={{
+                    flex: '0 0 auto',
+                    width: { xs: '85%', sm: '50%', md: '50%' },
+                    scrollSnapAlign: 'start',
+                    px: 1.5,
+                    display: 'flex',
+                    flexDirection: 'column',
+                  }}
+                >
+                  <PartnershipCard p={p} />
                 </Box>
-              </Box>
+              ))}
             </Box>
-          ))}
+          </Box>
+
+          <IconButton onClick={() => scroll('right')} disabled={!canScrollRight} sx={arrowSx(canScrollRight)}>
+            <ChevronRightIcon />
+          </IconButton>
         </Box>
+
       </Box>
     </Box>
   );

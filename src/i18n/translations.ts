@@ -54,10 +54,6 @@ export interface Translations {
     visitSite: string;
     tooltipCopy: string;
     tooltipCopied: string;
-    brands: {
-      impala: { description: string };
-      terranova: { description: string };
-    };
   };
   contact: {
     label: string;
