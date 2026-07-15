@@ -1,7 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { Box, Typography, Tooltip, IconButton } from '@mui/material';
-import PlayArrowIcon from '@mui/icons-material/PlayArrow';
-import CloseIcon from '@mui/icons-material/Close';
 import CheckIcon from '@mui/icons-material/Check';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
@@ -66,7 +64,6 @@ const PARTNERSHIPS: Partnership[] = [
 ];
 
 function PartnershipCard({ p }: { p: Partnership }) {
-  const [playing, setPlaying] = useState(false);
   const [copied, setCopied] = useState(false);
   const { t, lang } = useLanguage();
   const description = lang === 'en' && p.descriptionEn ? p.descriptionEn : p.description;
@@ -106,81 +103,22 @@ function PartnershipCard({ p }: { p: Partnership }) {
           flexShrink: 0,
         }}
       >
-        {playing ? (
-          <>
-            <Box
-              component="iframe"
-              src={`https://www.youtube.com/embed/${p.videoId}?autoplay=1&rel=0`}
-              title={p.name}
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-              sx={{ position: 'absolute', inset: 0, width: '100%', height: '100%', border: 'none' }}
-            />
-            <Box
-              onClick={() => setPlaying(false)}
-              role="button"
-              aria-label="Fechar vídeo"
-              sx={{
-                position: 'absolute', top: 8, right: 8,
-                width: 32, height: 32, borderRadius: '50%',
-                backgroundColor: 'rgba(0,0,0,0.7)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                cursor: 'pointer', zIndex: 2,
-                transition: 'background-color 0.2s',
-                '&:hover': { backgroundColor: 'rgba(0,0,0,0.9)' },
-              }}
-            >
-              <CloseIcon sx={{ fontSize: '1rem', color: '#fff' }} />
-            </Box>
-          </>
-        ) : (
-          <>
-            {thumbnail && (
-              <Box
-                component="img"
-                src={thumbnail}
-                alt={p.name}
-                sx={{
-                  position: 'absolute', inset: 0,
-                  width: '100%', height: '100%',
-                  objectFit: p.imageFit ?? 'cover',
-                  objectPosition: 'center',
-                  backgroundColor: p.imageBg ?? 'transparent',
-                  ...(p.imageFit === 'contain' && { padding: '20px' }),
-                  transition: 'transform 0.45s ease, filter 0.45s ease',
-                  transformOrigin: 'center',
-                  '.partnership-card:hover &': { transform: 'scale(1.04)', filter: 'brightness(0.75)' },
-                }}
-              />
-            )}
-            <Box
-              className="partnership-card"
-              onClick={() => setPlaying(true)}
-              role="button"
-              aria-label={`Reproduzir vídeo ${p.name}`}
-              sx={{
-                position: 'absolute', inset: 0,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                cursor: 'pointer',
-                '&:hover .play-btn': { transform: 'scale(1.1)' },
-              }}
-            >
-              <Box
-                className="play-btn"
-                sx={{
-                  width: 56, height: 56, borderRadius: '50%',
-                  backgroundColor: 'rgba(201,168,76,0.92)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  boxShadow: '0 4px 20px rgba(0,0,0,0.5)',
-                  transition: 'transform 0.2s',
-                }}
-              >
-                <PlayArrowIcon sx={{ color: '#0D0E11', fontSize: '1.9rem' }} />
-              </Box>
-            </Box>
-            <Box sx={{ position: 'absolute', top: 0, left: 0, right: 0, height: '2px', background: 'linear-gradient(to right, transparent, rgba(201,168,76,0.8), transparent)' }} />
-          </>
+        {thumbnail && (
+          <Box
+            component="img"
+            src={thumbnail}
+            alt={p.name}
+            sx={{
+              position: 'absolute', inset: 0,
+              width: '100%', height: '100%',
+              objectFit: p.imageFit ?? 'cover',
+              objectPosition: 'center',
+              backgroundColor: p.imageBg ?? 'transparent',
+              ...(p.imageFit === 'contain' && { padding: '20px' }),
+            }}
+          />
         )}
+        <Box sx={{ position: 'absolute', top: 0, left: 0, right: 0, height: '2px', background: 'linear-gradient(to right, transparent, rgba(201,168,76,0.8), transparent)' }} />
       </Box>
 
       {/* Content */}
@@ -257,21 +195,6 @@ function PartnershipCard({ p }: { p: Partnership }) {
         )}
 
         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3, alignItems: 'center' }}>
-          <Box
-            component="a" href={p.videoUrl} target="_blank" rel="noopener noreferrer"
-            sx={{
-              display: 'inline-flex', alignItems: 'center', gap: 0.75,
-              color: 'primary.main', textDecoration: 'none',
-              fontSize: '0.7rem', letterSpacing: '0.15em',
-              fontFamily: '"Inter", sans-serif', fontWeight: 500,
-              borderBottom: '1px solid rgba(201,168,76,0.3)', pb: 0.5,
-              transition: 'border-color 0.2s',
-              '&:hover': { borderColor: 'primary.main' },
-            }}
-          >
-            <PlayArrowIcon sx={{ fontSize: '0.9rem' }} />
-            {t.partnerships.watchVideo}
-          </Box>
           <Box
             component="a" href={p.websiteUrl} target="_blank" rel="noopener noreferrer"
             sx={{
