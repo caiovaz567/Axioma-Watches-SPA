@@ -22,9 +22,10 @@ export default function Hero() {
     >
       <Box
         component="img"
-        src="https://images.unsplash.com/photo-1523170335258-f5ed11844a49?w=1400&q=85&auto=format&fit=crop"
+        src="/hero-bg.jpg"
         alt=""
         aria-hidden
+        fetchPriority="high"
         sx={{
           position: 'absolute',
           inset: 0,

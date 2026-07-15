@@ -10,6 +10,7 @@ import CheckIcon from '@mui/icons-material/Check';
 import emailjs from '@emailjs/browser';
 import { useScrollReveal, revealSx } from '../hooks/useScrollReveal';
 import { useLanguage } from '../contexts/LanguageContext';
+import contactBg from '../assets/contact-bg.jpg';
 
 const EMAILJS_SERVICE_ID  = import.meta.env.VITE_EMAILJS_SERVICE_ID  as string;
 const EMAILJS_TEMPLATE_ID = import.meta.env.VITE_EMAILJS_TEMPLATE_ID as string;
@@ -55,7 +56,7 @@ export default function Contact() {
   const socials = [
     { icon: <YouTubeIcon sx={{ fontSize: '1.2rem' }} />, label: 'YouTube', handle: '@axiomawatches', href: 'https://www.youtube.com/@axiomawatches', color: '#FF0000' },
     { icon: <InstagramIcon sx={{ fontSize: '1.2rem' }} />, label: 'Instagram', handle: '@axiomawatcheschannel', href: 'https://www.instagram.com/axiomawatcheschannel', color: '#E1306C' },
-    { icon: <EmailIcon sx={{ fontSize: '1.2rem' }} />, label: t.contact.emailDirectLabel, handle: 'axiomawatches@gmail.com', href: 'mailto: axiomawatches@gmail.com', color: '#C9A84C' },
+    { icon: <EmailIcon sx={{ fontSize: '1.2rem' }} />, label: t.contact.emailDirectLabel, handle: 'axiomawatches@gmail.com', href: 'mailto:axiomawatches@gmail.com', color: '#C9A84C' },
   ];
 
   const validate = (n: string, em: string, msg: string): FormErrors => {
@@ -229,9 +230,10 @@ export default function Contact() {
         <Box sx={{ px: { xs: 4, sm: 6, md: 8, lg: 10 }, py: { xs: 8, lg: 14 }, display: 'flex', flexDirection: 'column', justifyContent: 'center', position: 'relative', overflow: 'hidden' }}>
           <Box
             component="img"
-            src="https://images.unsplash.com/photo-1548169874-53e85f753f1e?w=700&q=70&auto=format&fit=crop"
+            src={contactBg}
             alt=""
             aria-hidden
+            loading="lazy"
             sx={{
               ...revealSx(visible, 80),
               position: 'absolute', inset: 0, width: '100%', height: '100%',

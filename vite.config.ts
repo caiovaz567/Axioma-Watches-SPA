@@ -1,6 +1,7 @@
 import { defineConfig, loadEnv } from 'vite'
 import react from '@vitejs/plugin-react'
 import type { Plugin } from 'vite'
+import { fetchOgImage } from './api/_lib/og'
 
 function apiSheetPlugin(env: Record<string, string>): Plugin {
   return {
@@ -42,32 +43,7 @@ function apiSheetPlugin(env: Record<string, string>): Plugin {
           return;
         }
         try {
-          const response = await fetch(url, {
-            headers: { 'User-Agent': 'Mozilla/5.0 (compatible; Googlebot/2.1)' },
-            signal: AbortSignal.timeout(5000),
-          });
-          const html = await response.text();
-
-          let imageUrl: string | null = null;
-          const jsonLdMatches = html.matchAll(/<script[^>]+type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi);
-          for (const m of jsonLdMatches) {
-            try {
-              const data = JSON.parse(m[1]);
-              const imgs = data.image ?? data.images;
-              if (Array.isArray(imgs) && imgs.length > 0) {
-                const candidate = (imgs[1] ?? imgs[0]) as string;
-                if (typeof candidate === 'string' && candidate.startsWith('http')) { imageUrl = candidate; break; }
-              }
-              if (typeof imgs === 'string' && imgs.startsWith('http')) { imageUrl = imgs; break; }
-            } catch { /* ignore */ }
-          }
-          if (!imageUrl) {
-            const ogMatch =
-              html.match(/<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)["']/i) ??
-              html.match(/<meta[^>]+content=["']([^"']+)["'][^>]+property=["']og:image["']/i);
-            imageUrl = ogMatch?.[1] ?? null;
-          }
-
+          const imageUrl = await fetchOgImage(url);
           res.setHeader('Content-Type', 'application/json');
           res.end(JSON.stringify({ imageUrl }));
         } catch {

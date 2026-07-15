@@ -16,9 +16,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
     const response = await fetch(url, { cache: 'no-store' });
     const csv = await response.text();
+    // Sem cache: a planilha é o CMS e as edições precisam aparecer na hora.
     res.setHeader('Cache-Control', 'no-store');
     res.setHeader('Content-Type', 'text/csv');
-    res.setHeader('Access-Control-Allow-Origin', '*');
     res.send(csv);
   } catch {
     res.status(500).json({ error: 'failed to fetch sheet' });

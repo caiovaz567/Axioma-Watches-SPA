@@ -4,12 +4,12 @@ const inFlight = new Map<string, Promise<string[][]>>();
 
 export type SheetType = 'video' | 'recomendacoes';
 
-export function useSheetData(type: SheetType, cacheKey: string) {
+export function useSheetData(type: SheetType) {
   const [data, setData] = useState<string[][]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const url = `/api/sheet?type=${type}&_t=${Date.now()}`;
+    const url = `/api/sheet?type=${type}`;
 
     let promise = inFlight.get(type);
     if (!promise) {
@@ -29,7 +29,7 @@ export function useSheetData(type: SheetType, cacheKey: string) {
       .then((rows) => setData(rows))
       .catch(() => {})
       .finally(() => setLoading(false));
-  }, [type, cacheKey]);
+  }, [type]);
 
   return { data, loading };
 }

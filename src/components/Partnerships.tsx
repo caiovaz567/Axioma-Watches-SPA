@@ -1,10 +1,9 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
-import { Box, Typography, Tooltip, IconButton } from '@mui/material';
+import { useState } from 'react';
+import { Box, Typography, Tooltip } from '@mui/material';
 import CheckIcon from '@mui/icons-material/Check';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
-import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
-import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import Carousel from './Carousel';
 import impalaImg from '../assets/banner-empresa-1170x305.jpg';
 import terranovaImg from '../assets/d86c3fa9-b022-4d13-91d7-b2246a746426_logo-azul-jpg.jpg';
 import roueImg from '../assets/roue_logo.svg';
@@ -153,7 +152,14 @@ function PartnershipCard({ p }: { p: Partnership }) {
           >
             <Box
               onClick={handleCopy}
+              onKeyDown={(e: React.KeyboardEvent) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  handleCopy();
+                }
+              }}
               role="button"
+              tabIndex={0}
               aria-label={`Copiar cupom ${p.coupon}`}
               sx={{
                 display: 'inline-flex', alignItems: 'center', gap: 1,
@@ -216,59 +222,9 @@ function PartnershipCard({ p }: { p: Partnership }) {
   );
 }
 
-const arrowSx = (enabled: boolean) => ({
-  flexShrink: 0,
-  display: { xs: 'none', md: 'flex' },
-  color: enabled ? 'primary.main' : 'rgba(255,255,255,0.15)',
-  border: '1px solid',
-  borderColor: enabled ? 'rgba(201,168,76,0.4)' : 'rgba(255,255,255,0.08)',
-  borderRadius: '50%',
-  width: 44,
-  height: 44,
-  transition: 'all 0.2s',
-  '&:hover:not(:disabled)': {
-    borderColor: 'primary.main',
-    backgroundColor: 'rgba(201,168,76,0.08)',
-  },
-  '&.Mui-disabled': {
-    color: 'rgba(255,255,255,0.15)',
-    borderColor: 'rgba(255,255,255,0.08)',
-  },
-});
-
 export default function Partnerships() {
   const { ref, visible } = useScrollReveal();
   const { t } = useLanguage();
-  const trackRef = useRef<HTMLDivElement>(null);
-  const [canScrollLeft, setCanScrollLeft] = useState(false);
-  const [canScrollRight, setCanScrollRight] = useState(false);
-
-  const updateScrollState = useCallback(() => {
-    const el = trackRef.current;
-    if (!el) return;
-    setCanScrollLeft(el.scrollLeft > 1);
-    setCanScrollRight(el.scrollLeft < el.scrollWidth - el.clientWidth - 1);
-  }, []);
-
-  useEffect(() => {
-    const el = trackRef.current;
-    if (!el) return;
-    const raf = requestAnimationFrame(updateScrollState);
-    el.addEventListener('scroll', updateScrollState, { passive: true });
-    const ro = new ResizeObserver(updateScrollState);
-    ro.observe(el);
-    return () => {
-      cancelAnimationFrame(raf);
-      el.removeEventListener('scroll', updateScrollState);
-      ro.disconnect();
-    };
-  }, [updateScrollState]);
-
-  const scroll = (dir: 'left' | 'right') => {
-    const el = trackRef.current;
-    if (!el) return;
-    el.scrollBy({ left: dir === 'left' ? -el.clientWidth : el.clientWidth, behavior: 'smooth' });
-  };
 
   return (
     <Box
@@ -321,54 +277,23 @@ export default function Partnerships() {
           </Typography>
         </Box>
 
-        <Box
-          sx={{
-            ...revealSx(visible, 300),
-            display: 'flex',
-            alignItems: 'center',
-            gap: { md: 2 },
-          }}
-        >
-          <IconButton onClick={() => scroll('left')} disabled={!canScrollLeft} sx={arrowSx(canScrollLeft)}>
-            <ChevronLeftIcon />
-          </IconButton>
-
-          <Box sx={{ overflow: 'hidden', flex: 1, mx: { xs: -4, sm: -6, md: 0 } }}>
+        <Carousel sx={revealSx(visible, 300)}>
+          {PARTNERSHIPS.map((p, i) => (
             <Box
-              ref={trackRef}
+              key={i}
               sx={{
+                flex: '0 0 auto',
+                width: { xs: '85%', sm: '50%', md: '50%' },
+                scrollSnapAlign: 'start',
+                px: 1.5,
                 display: 'flex',
-                overflowX: 'auto',
-                scrollSnapType: 'x mandatory',
-                '&::-webkit-scrollbar': { display: 'none' },
-                msOverflowStyle: 'none',
-                scrollbarWidth: 'none',
-                px: { xs: 4, sm: 6, md: 0 },
-                scrollPaddingLeft: { xs: '32px', sm: '48px', md: '0px' },
+                flexDirection: 'column',
               }}
             >
-              {PARTNERSHIPS.map((p, i) => (
-                <Box
-                  key={i}
-                  sx={{
-                    flex: '0 0 auto',
-                    width: { xs: '85%', sm: '50%', md: '50%' },
-                    scrollSnapAlign: 'start',
-                    px: 1.5,
-                    display: 'flex',
-                    flexDirection: 'column',
-                  }}
-                >
-                  <PartnershipCard p={p} />
-                </Box>
-              ))}
+              <PartnershipCard p={p} />
             </Box>
-          </Box>
-
-          <IconButton onClick={() => scroll('right')} disabled={!canScrollRight} sx={arrowSx(canScrollRight)}>
-            <ChevronRightIcon />
-          </IconButton>
-        </Box>
+          ))}
+        </Carousel>
 
       </Box>
     </Box>

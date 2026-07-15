@@ -1,4 +1,4 @@
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
 import translations from '../i18n/translations';
 import type { Lang, Translations } from '../i18n/translations';
@@ -12,13 +12,12 @@ interface LanguageContextType {
 const LanguageContext = createContext<LanguageContextType | null>(null);
 
 function getDefaultLang(): Lang {
-  const host = window.location.hostname;
-  if (host === 'localhost' || host.startsWith('192.168.') || host.endsWith('.com.br')) return 'pt';
-  return 'en';
+  const languages = navigator.languages ?? [navigator.language];
+  return languages.some((l) => l?.toLowerCase().startsWith('pt')) ? 'pt' : 'en';
 }
 
 function getSavedLang(): Lang {
-  const saved = sessionStorage.getItem('lang');
+  const saved = localStorage.getItem('lang');
   if (saved === 'en' || saved === 'pt') return saved;
   return getDefaultLang();
 }
@@ -26,8 +25,12 @@ function getSavedLang(): Lang {
 export function LanguageProvider({ children }: { children: ReactNode }) {
   const [lang, setLang] = useState<Lang>(getSavedLang);
 
+  useEffect(() => {
+    document.documentElement.lang = lang === 'pt' ? 'pt-BR' : 'en';
+  }, [lang]);
+
   function handleSetLang(l: Lang) {
-    sessionStorage.setItem('lang', l);
+    localStorage.setItem('lang', l);
     setLang(l);
   }
 
@@ -38,6 +41,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components -- hook e provider convivem no mesmo arquivo por design
 export function useLanguage() {
   const ctx = useContext(LanguageContext);
   if (!ctx) throw new Error('useLanguage must be used within LanguageProvider');
