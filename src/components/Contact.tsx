@@ -50,6 +50,8 @@ export default function Contact() {
   });
   const [copiedLabel, setCopiedLabel] = useState<string | null>(null);
   const [formHighlighted, setFormHighlighted] = useState(false);
+  // Anti-spam: campo isca que humanos não veem + tempo mínimo de preenchimento.
+  const mountedAt = useRef(Date.now());
   const formRef = useRef<HTMLElement>(null);
   const { ref: sectionRef, visible } = useScrollReveal();
 
@@ -94,6 +96,17 @@ export default function Contact() {
       return;
     }
     setErrors({});
+    // Lê o campo isca direto do DOM no envio — pega robôs que setam .value sem disparar eventos
+    const form = formRef.current as HTMLFormElement | null;
+    const honeypot = (form?.elements.namedItem('website') as HTMLInputElement | null)?.value;
+    if (honeypot || Date.now() - mountedAt.current < 3000) {
+      // Robô detectado: finge sucesso sem enviar, para não revelar o filtro
+      setSnackbar({ open: true, type: 'success', msg: t.contact.success });
+      setNome('');
+      setEmail('');
+      setMensagem('');
+      return;
+    }
     setLoading(true);
     try {
       await emailjs.send(
@@ -145,6 +158,17 @@ export default function Contact() {
           <Typography variant="body2" sx={{ ...revealSx(visible, 200), color: 'text.secondary', mb: 5, lineHeight: 1.8, maxWidth: 380 }}>
             {t.contact.body}
           </Typography>
+
+          <Box
+            component="input"
+            type="text"
+            name="website"
+            defaultValue=""
+            tabIndex={-1}
+            autoComplete="off"
+            aria-hidden="true"
+            sx={{ position: 'absolute', left: '-9999px', width: 1, height: 1, opacity: 0, pointerEvents: 'none' }}
+          />
 
           <Box sx={{ ...revealSx(visible, 320), display: 'flex', flexDirection: 'column', gap: 2.5, mb: 3 }}>
             <TextField

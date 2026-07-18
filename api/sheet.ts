@@ -16,8 +16,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
     const response = await fetch(url, { cache: 'no-store' });
     const csv = await response.text();
-    // Sem cache: a planilha é o CMS e as edições precisam aparecer na hora.
-    res.setHeader('Cache-Control', 'no-store');
+    // Cache curto na CDN: o site abre rápido e edições na planilha aparecem em até 1 min.
+    res.setHeader('Cache-Control', 's-maxage=60, stale-while-revalidate=300');
     res.setHeader('Content-Type', 'text/csv');
     res.send(csv);
   } catch {
