@@ -14,6 +14,16 @@ const PRIVATE_HOST_PATTERNS = [
   /^\[?f[cd][0-9a-f]{2}:/i,
 ];
 
+// Lojas parceiras cujas páginas podem ser buscadas pelo endpoint.
+// Ao fechar parceria com uma loja nova, adicione o domínio dela aqui
+// (mesma manutenção do mapa PARTNER_NAMES em Recommendations.tsx).
+const ALLOWED_STORE_HOSTS = [
+  'terranovawatches.com',
+  'relojoariaimpala.com.br',
+  'rouewatch.com.br',
+  'valliwatches.com.br',
+];
+
 /** Aceita apenas http(s) público — bloqueia localhost/IPs privados (SSRF). */
 export function isSafePublicUrl(raw: string): boolean {
   let url: URL;
@@ -24,6 +34,16 @@ export function isSafePublicUrl(raw: string): boolean {
   }
   if (url.protocol !== 'http:' && url.protocol !== 'https:') return false;
   return !PRIVATE_HOST_PATTERNS.some((re) => re.test(url.hostname));
+}
+
+/** Restringe o endpoint às lojas parceiras — impede uso como proxy aberto. */
+export function isAllowedStoreUrl(raw: string): boolean {
+  try {
+    const host = new URL(raw).hostname.replace(/^www\./i, '').toLowerCase();
+    return ALLOWED_STORE_HOSTS.includes(host);
+  } catch {
+    return false;
+  }
 }
 
 export function extractBestImage(html: string): string | null {
@@ -53,11 +73,24 @@ export function extractBestImage(html: string): string | null {
 }
 
 export async function fetchOgImage(url: string): Promise<string | null> {
-  if (!isSafePublicUrl(url)) return null;
-  const response = await fetch(url, {
-    headers: { 'User-Agent': 'Mozilla/5.0 (compatible; Googlebot/2.1)' },
-    signal: AbortSignal.timeout(5000),
-  });
-  const html = await response.text();
-  return extractBestImage(html);
+  // Segue redirecionamentos manualmente, revalidando cada destino —
+  // um redirect não pode escapar da allowlist nem apontar para IP interno.
+  let current = url;
+  for (let hop = 0; hop < 4; hop++) {
+    if (!isSafePublicUrl(current) || !isAllowedStoreUrl(current)) return null;
+    const response = await fetch(current, {
+      headers: { 'User-Agent': 'Mozilla/5.0 (compatible; Googlebot/2.1)' },
+      signal: AbortSignal.timeout(5000),
+      redirect: 'manual',
+    });
+    if (response.status >= 300 && response.status < 400) {
+      const location = response.headers.get('location');
+      if (!location) return null;
+      current = new URL(location, current).toString();
+      continue;
+    }
+    const html = await response.text();
+    return extractBestImage(html);
+  }
+  return null;
 }

@@ -39,8 +39,10 @@ const en: Translations = {
   },
   recommendations: {
     label: 'RECOMMENDATIONS',
-    heading: 'Watches recommended',
+    heading: 'Recommended Watches',
     subtitle: 'A personal curation of watches that are worth every penny — tested, approved, and recommended with transparency alongside our partners.',
+    filterAll: 'All',
+    loadError: 'We could not load the recommendations right now. Please try again in a moment.',
     badge: 'RECOMMENDED',
     visitStore: 'VIEW IN STORE',
     couponLabel: 'COUPON',
@@ -62,8 +64,8 @@ const en: Translations = {
   },
   partnerships: {
     label: 'PARTNERSHIPS',
-    headingPart1: 'Completed',
-    headingPart2: 'Projects',
+    headingPart1: 'Our',
+    headingPart2: 'Partners',
     subtitle: 'Partnerships with brands in the segment — use the exclusive coupon to enjoy special conditions.',
     couponLabel: 'COUPON',
     copied: 'COPIED!',

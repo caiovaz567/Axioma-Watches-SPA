@@ -8,7 +8,8 @@ export default function BackToTop() {
   const { t } = useLanguage();
 
   useEffect(() => {
-    const onScroll = () => setVisible(window.scrollY > 400);
+    // Só aparece depois de ~1,5 tela de rolagem, para não pairar sobre o conteúdo à toa
+    const onScroll = () => setVisible(window.scrollY > 1200);
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
@@ -24,15 +25,17 @@ export default function BackToTop() {
           aria-label={t.backToTop}
           sx={{
             position: 'fixed',
-            bottom: 28,
-            right: 28,
+            bottom: { xs: 20, md: 28 },
+            right: { xs: 16, md: 28 },
             zIndex: 1300,
             backgroundColor: 'rgba(13,14,17,0.9)',
             border: '1px solid rgba(201,168,76,0.35)',
             color: 'primary.main',
             backdropFilter: 'blur(8px)',
             boxShadow: '0 4px 20px rgba(0,0,0,0.4)',
-            '&:hover': { backgroundColor: 'rgba(201,168,76,0.1)', borderColor: 'primary.main' },
+            opacity: { xs: 0.65, md: 1 },
+            transition: 'opacity 0.2s',
+            '&:hover, &:active': { backgroundColor: 'rgba(201,168,76,0.1)', borderColor: 'primary.main', opacity: 1 },
           }}
         >
           <KeyboardArrowUpIcon />
