@@ -134,11 +134,20 @@ function PartnershipCard({ p }: { p: Partnership }) {
           {p.name}
         </Typography>
 
-        <Box sx={{ flex: 1, minHeight: '4.5rem' }}>
+        {/* Altura rígida (6 linhas) para cupom e botões ficarem alinhados entre os cards */}
+        <Box sx={{ height: '9.2rem', overflow: 'hidden', mb: 2.5 }}>
           {description && (
             <Typography
               variant="body2"
-              sx={{ color: 'text.secondary', lineHeight: 1.75, fontSize: '0.875rem', mb: 2.5 }}
+              sx={{
+                color: 'text.secondary',
+                lineHeight: 1.75,
+                fontSize: '0.875rem',
+                display: '-webkit-box',
+                WebkitLineClamp: 6,
+                WebkitBoxOrient: 'vertical',
+                overflow: 'hidden',
+              }}
             >
               {description}
             </Typography>
@@ -233,6 +242,7 @@ export default function Partnerships() {
         backgroundColor: '#0D0E11',
         borderTop: '1px solid rgba(201,168,76,0.08)',
         py: { xs: 10, md: 14 },
+        scrollMarginTop: { xs: 72, md: 96 },
       }}
     >
       <Box ref={ref} sx={{ maxWidth: 1600, mx: 'auto', px: { xs: 4, sm: 6, md: 6 } }}>

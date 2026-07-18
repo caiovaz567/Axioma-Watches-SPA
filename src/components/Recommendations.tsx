@@ -421,6 +421,7 @@ export default function Recommendations() {
         backgroundColor: '#0D0E11',
         borderTop: '1px solid rgba(201,168,76,0.08)',
         py: { xs: 10, md: 14 },
+        scrollMarginTop: { xs: 72, md: 96 },
       }}
     >
       <Box ref={ref} sx={{ maxWidth: 1600, mx: 'auto', px: { xs: 4, sm: 6, md: 6 } }}>

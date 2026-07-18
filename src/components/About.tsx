@@ -9,7 +9,7 @@ export default function About() {
   const { pillars } = t.about;
 
   return (
-    <Box id="about" sx={{ backgroundColor: '#0D0E11', overflow: 'hidden' }}>
+    <Box id="about" sx={{ backgroundColor: '#0D0E11', overflow: 'hidden', scrollMarginTop: { xs: 72, md: 96 } }}>
       <Box
         ref={ref}
         sx={{

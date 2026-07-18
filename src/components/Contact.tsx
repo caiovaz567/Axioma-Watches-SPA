@@ -127,7 +127,7 @@ export default function Contact() {
   };
 
   return (
-    <Box id="contact" sx={{ backgroundColor: '#0D0E11', borderTop: '1px solid rgba(201,168,76,0.08)' }}>
+    <Box id="contact" sx={{ backgroundColor: '#0D0E11', borderTop: '1px solid rgba(201,168,76,0.08)', scrollMarginTop: { xs: 72, md: 96 } }}>
       <Box
         ref={sectionRef}
         sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', lg: '1fr 1fr' }, maxWidth: 1200, mx: 'auto' }}

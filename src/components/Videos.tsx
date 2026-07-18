@@ -19,6 +19,7 @@ export default function Videos() {
         px: { xs: 2, md: 4 },
         backgroundColor: '#0D0E11',
         borderTop: '1px solid rgba(201,168,76,0.08)',
+        scrollMarginTop: { xs: 72, md: 96 },
       }}
     >
       <Box ref={ref} sx={{ maxWidth: 1200, mx: 'auto', ...revealSx(visible) }}>
