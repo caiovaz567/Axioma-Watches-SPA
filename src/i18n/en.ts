@@ -9,8 +9,11 @@ const en: Translations = {
     contact: 'Contact',
   },
   hero: {
+    kicker: 'The world of watchmaking',
     description: 'A space dedicated to fine watchmaking and constant sharing of content related to the hobby.',
     tagline: 'Always adding value. Keeping truth in all information presented.',
+    ctaPrimary: 'Visit the channel',
+    ctaSecondary: 'See recommendations',
   },
   about: {
     label: 'ABOUT THE CHANNEL',

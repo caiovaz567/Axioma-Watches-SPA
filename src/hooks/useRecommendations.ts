@@ -64,7 +64,7 @@ const FALLBACK: Watch[] = [
 ];
 
 export function useRecommendations() {
-  const { data, loading } = useSheetData('recomendacoes', 'recommendations_cache');
+  const { data, loading } = useSheetData('recomendacoes');
 
   const watches = useMemo<Watch[]>(() => {
     if (data.length === 0) return FALLBACK;

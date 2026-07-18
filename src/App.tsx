@@ -23,7 +23,6 @@ export default function App() {
       <CssBaseline />
       <Box sx={{ overflowX: 'hidden' }}>
         <Header />
-        <Box sx={{ pt: { xs: '56px', sm: '64px' } }} />
         <Hero />
         <Suspense fallback={null}>
           <Promo />

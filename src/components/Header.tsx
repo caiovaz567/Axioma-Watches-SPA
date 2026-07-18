@@ -1,16 +1,73 @@
 import { useState, useEffect, useRef } from 'react';
-import { AppBar, Toolbar, Box, Typography, IconButton, Drawer, List, ListItemButton } from '@mui/material';
+import { AppBar, Toolbar, Box, Typography, IconButton, Drawer, List, ListItemButton, ButtonBase } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import CloseIcon from '@mui/icons-material/Close';
-import axiomaLogo from '../assets/AXIOMA_LOGO.png';
+import axiomaLogo from '../assets/axioma-logo-128.png';
 import { useLanguage } from '../contexts/LanguageContext';
+import type { Lang } from '../i18n/translations';
+
+const NAV_IDS = ['#about', '#videos', '#parcerias', '#recomendacoes', '#contact'] as const;
+
+function LangToggle({ lang, setLang }: { lang: Lang; setLang: (l: Lang) => void }) {
+  return (
+    <Box sx={{ display: 'flex', gap: 0.5, userSelect: 'none' }}>
+      {(['pt', 'en'] as const).map((l) => (
+        <ButtonBase
+          key={l}
+          onClick={() => setLang(l)}
+          aria-label={l === 'pt' ? 'Português' : 'English'}
+          aria-pressed={lang === l}
+          sx={{
+            px: 1.5,
+            py: 0.4,
+            borderRadius: '4px',
+            border: '1px solid',
+            borderColor: lang === l ? 'primary.main' : 'rgba(201,168,76,0.2)',
+            backgroundColor: lang === l ? 'rgba(201,168,76,0.1)' : 'transparent',
+            cursor: 'pointer',
+            transition: 'all 0.2s',
+            minWidth: 40,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            '&:hover': {
+              borderColor: 'primary.main',
+              backgroundColor: 'rgba(201,168,76,0.06)',
+            },
+          }}
+        >
+          <Typography
+            sx={{
+              fontFamily: '"Inter", sans-serif',
+              fontSize: '0.7rem',
+              letterSpacing: '0.12em',
+              fontWeight: 600,
+              color: lang === l ? 'primary.main' : 'rgba(200,200,200,0.4)',
+              transition: 'color 0.2s',
+            }}
+          >
+            {l.toUpperCase()}
+          </Typography>
+        </ButtonBase>
+      ))}
+    </Box>
+  );
+}
 
 export default function Header() {
   const { t, lang, setLang } = useLanguage();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [activeSection, setActiveSection] = useState<string>('');
+  const [scrolled, setScrolled] = useState(false);
   const isScrolling = useRef(false);
   const scrollTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 24);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
 
   const navLinks = [
     { label: t.nav.about, id: '#about' },
@@ -23,7 +80,7 @@ export default function Header() {
   useEffect(() => {
     const observers: IntersectionObserver[] = [];
 
-    navLinks.forEach(({ id }) => {
+    NAV_IDS.forEach((id) => {
       const el = document.querySelector(id);
       if (!el) return;
 
@@ -72,63 +129,25 @@ export default function Header() {
     }, 1200);
   };
 
-  const LangToggle = () => (
-    <Box sx={{ display: 'flex', gap: 0.5, userSelect: 'none' }}>
-      {(['pt', 'en'] as const).map((l) => (
-        <Box
-          key={l}
-          onClick={() => setLang(l)}
-          sx={{
-            px: 1.5,
-            py: 0.4,
-            borderRadius: '4px',
-            border: '1px solid',
-            borderColor: lang === l ? 'primary.main' : 'rgba(201,168,76,0.2)',
-            backgroundColor: lang === l ? 'rgba(201,168,76,0.1)' : 'transparent',
-            cursor: 'pointer',
-            transition: 'all 0.2s',
-            minWidth: 40,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            '&:hover': {
-              borderColor: 'primary.main',
-              backgroundColor: 'rgba(201,168,76,0.06)',
-            },
-          }}
-        >
-          <Typography
-            sx={{
-              fontFamily: '"Inter", sans-serif',
-              fontSize: '0.7rem',
-              letterSpacing: '0.12em',
-              fontWeight: 600,
-              color: lang === l ? 'primary.main' : 'rgba(200,200,200,0.4)',
-              transition: 'color 0.2s',
-            }}
-          >
-            {l.toUpperCase()}
-          </Typography>
-        </Box>
-      ))}
-    </Box>
-  );
-
   return (
     <>
       <AppBar
         position="fixed"
         elevation={0}
         sx={{
-          backgroundColor: 'rgba(13,14,17,0.88)',
-          backdropFilter: 'blur(12px)',
-          borderBottom: '1px solid rgba(201,168,76,0.12)',
+          backgroundColor: scrolled ? 'rgba(13,14,17,0.92)' : 'transparent',
+          backdropFilter: scrolled ? 'blur(12px)' : 'none',
+          borderBottom: '1px solid',
+          borderBottomColor: scrolled ? 'rgba(201,168,76,0.18)' : 'transparent',
+          boxShadow: scrolled ? '0 12px 40px rgba(0,0,0,0.45)' : 'none',
+          transition: 'background-color 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease, backdrop-filter 0.35s ease',
         }}
       >
         <Toolbar sx={{ justifyContent: 'space-between', px: { xs: 2, md: 6 }, minHeight: { xs: 56, sm: 64 } }}>
 
-          <Box
+          <ButtonBase
             onClick={() => scrollTo('#hero')}
+            aria-label="Voltar ao início"
             sx={{ display: 'flex', alignItems: 'center', gap: 1.5, cursor: 'pointer', userSelect: 'none' }}
           >
             <Box
@@ -158,13 +177,13 @@ export default function Header() {
             >
               AXIOMA WATCHES
             </Typography>
-          </Box>
+          </ButtonBase>
 
           <Box sx={{ display: { xs: 'none', md: 'flex' }, alignItems: 'center', gap: 4 }}>
             {navLinks.map((link) => {
               const isActive = activeSection === link.id;
               return (
-                <Box key={link.id} onClick={() => scrollTo(link.id)} sx={{ position: 'relative', cursor: 'pointer', userSelect: 'none', pb: 0.5 }}>
+                <ButtonBase key={link.id} onClick={() => scrollTo(link.id)} sx={{ position: 'relative', cursor: 'pointer', userSelect: 'none', pb: 0.5 }}>
                   <Typography
                     sx={{
                       fontFamily: '"Inter", sans-serif',
@@ -190,14 +209,14 @@ export default function Header() {
                       transformOrigin: 'center',
                     }}
                   />
-                </Box>
+                </ButtonBase>
               );
             })}
-            <LangToggle />
+            <LangToggle lang={lang} setLang={setLang} />
           </Box>
 
           <Box sx={{ display: { xs: 'flex', md: 'none' }, alignItems: 'center', gap: 1.5 }}>
-            <LangToggle />
+            <LangToggle lang={lang} setLang={setLang} />
             <IconButton
               onClick={() => setDrawerOpen(true)}
               sx={{ color: 'rgba(201,168,76,0.8)', p: 0.75 }}

@@ -1,6 +1,7 @@
 import { Box, Typography } from '@mui/material';
 import { useScrollReveal, revealSx } from '../hooks/useScrollReveal';
 import { useLanguage } from '../contexts/LanguageContext';
+import aboutImg from '../assets/about.jpg';
 
 export default function About() {
   const { ref, visible } = useScrollReveal();
@@ -26,7 +27,8 @@ export default function About() {
         >
           <Box
             component="img"
-            src="https://images.unsplash.com/photo-1761767189587-7f5930fcd9a8?w=900&q=85&auto=format&fit=crop"
+            src={aboutImg}
+            loading="lazy"
             alt={t.about.imgAlt}
             sx={{
               ...revealSx(visible, 0),

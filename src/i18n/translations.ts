@@ -12,8 +12,11 @@ export interface Translations {
     contact: string;
   };
   hero: {
+    kicker: string;
     description: string;
     tagline: string;
+    ctaPrimary: string;
+    ctaSecondary: string;
   };
   about: {
     label: string;

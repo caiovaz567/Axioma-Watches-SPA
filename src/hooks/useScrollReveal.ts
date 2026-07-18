@@ -7,6 +7,9 @@ export function useScrollReveal(options?: IntersectionObserverInit) {
 
   const ref = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(prefersReduced);
+  // Só o valor da montagem importa — evita re-observar a cada render
+  // quando o caller passa um objeto literal.
+  const optionsRef = useRef(options);
 
   useEffect(() => {
     if (prefersReduced) return;
@@ -20,7 +23,7 @@ export function useScrollReveal(options?: IntersectionObserverInit) {
           observer.disconnect();
         }
       },
-      { threshold: 0.12, ...options }
+      { threshold: 0.12, ...optionsRef.current }
     );
 
     observer.observe(el);

@@ -9,8 +9,11 @@ const pt_BR: Translations = {
     contact: 'Contato',
   },
   hero: {
+    kicker: 'O universo da relojoaria',
     description: 'Espaço dedicado a boa relojoaria e compartilhamento constante sobre assuntos relacionados ao seguimento.',
     tagline: 'Agregar sempre. Mantendo a verdade nas informações apresentadas.',
+    ctaPrimary: 'Conheça o canal',
+    ctaSecondary: 'Ver recomendações',
   },
   about: {
     label: 'SOBRE O CANAL',

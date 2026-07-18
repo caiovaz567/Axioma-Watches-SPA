@@ -1,12 +1,14 @@
 import { useState } from 'react';
-import { Box } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import { useScrollReveal, revealSx } from '../hooks/useScrollReveal';
 import { useVideoConfig } from '../hooks/useVideoConfig';
+import { useLanguage } from '../contexts/LanguageContext';
 
 export default function Videos() {
   const { ref, visible } = useScrollReveal();
   const { videoId } = useVideoConfig();
+  const { t } = useLanguage();
   const [playing, setPlaying] = useState(false);
 
   return (
@@ -20,6 +22,44 @@ export default function Videos() {
       }}
     >
       <Box ref={ref} sx={{ maxWidth: 1200, mx: 'auto', ...revealSx(visible) }}>
+        <Box sx={{ mb: { xs: 6, md: 8 }, textAlign: 'center' }}>
+          <Typography
+            sx={{
+              ...revealSx(visible, 0),
+              color: 'primary.main',
+              fontSize: '0.78rem',
+              letterSpacing: '0.35em',
+              mb: 2,
+              fontFamily: '"Inter", sans-serif',
+            }}
+          >
+            {t.videos.label}
+          </Typography>
+          <Typography
+            variant="h2"
+            sx={{
+              ...revealSx(visible, 100),
+              fontSize: { xs: '2rem', md: '2.6rem' },
+              color: '#EBEBEB',
+              lineHeight: 1.2,
+            }}
+          >
+            {t.videos.heading}
+          </Typography>
+          <Typography
+            variant="body2"
+            sx={{
+              ...revealSx(visible, 200),
+              color: 'text.secondary',
+              mt: 2,
+              maxWidth: 480,
+              mx: 'auto',
+              lineHeight: 1.8,
+            }}
+          >
+            {t.videos.subtitle}
+          </Typography>
+        </Box>
         <Box
           sx={{
             position: 'relative',
@@ -32,6 +72,15 @@ export default function Videos() {
             backgroundColor: '#111',
           }}
           onClick={() => !playing && setPlaying(true)}
+          onKeyDown={(e: React.KeyboardEvent) => {
+            if (!playing && (e.key === 'Enter' || e.key === ' ')) {
+              e.preventDefault();
+              setPlaying(true);
+            }
+          }}
+          role={playing ? undefined : 'button'}
+          tabIndex={playing ? undefined : 0}
+          aria-label={playing ? undefined : t.videos.heading}
         >
           {playing ? (
             <Box

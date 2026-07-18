@@ -9,7 +9,7 @@ function extractVideoId(input: string): string {
 }
 
 export function useVideoConfig() {
-  const { data, loading } = useSheetData('video', 'video_cache');
+  const { data, loading } = useSheetData('video');
 
   const videoId = useMemo<string>(() => {
     if (data.length === 0) return FALLBACK_ID;
