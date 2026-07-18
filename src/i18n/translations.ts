@@ -36,6 +36,7 @@ export interface Translations {
     heading: string;
     subtitle: string;
     filterAll: string;
+    loadError: string;
     badge: string;
     visitStore: string;
     couponLabel: string;

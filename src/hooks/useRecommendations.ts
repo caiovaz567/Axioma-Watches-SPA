@@ -25,52 +25,14 @@ const GRADIENTS = [
   'linear-gradient(135deg, #1a0a0a 0%, #3d1010 50%, #5a1a1a 100%)',
 ];
 
-const FALLBACK: Watch[] = [
-  {
-    brand: 'Seiko',
-    model: 'Turtle SRP777',
-    description: 'Um ícone do mergulho com movimento automático 4R36, reserva de marcha de 41h e resistência a 200m.',
-    storeUrl: 'https://www.relojoariaimpala.com.br',
-    gradient: GRADIENTS[0],
-  },
-  {
-    brand: 'Citizen',
-    model: 'Promaster Diver NY0040',
-    description: 'Tecnologia Eco-Drive, resistência a 200m e acabamento superlativo. Custo-benefício difícil de superar.',
-    storeUrl: 'https://www.relojoariaimpala.com.br',
-    gradient: GRADIENTS[1],
-  },
-  {
-    brand: 'Spinnaker',
-    model: 'Hull SP-5068-03',
-    description: 'Design náutico britânico com movimento automático NH35. Uma das melhores opções na faixa de entrada premium.',
-    storeUrl: 'https://www.relojoariaimpala.com.br',
-    gradient: GRADIENTS[2],
-  },
-  {
-    brand: 'Orient',
-    model: 'Mako II FAA02001B',
-    description: 'Automático com hacking e hand-winding, luneta interna e 200m de resistência. Clássico acessível.',
-    storeUrl: 'https://www.relojoariaimpala.com.br',
-    gradient: GRADIENTS[3],
-  },
-  {
-    brand: 'Terranova',
-    model: 'Modelo Exclusivo',
-    description: 'Micro Brand nacional que despontou em 2024 com acabamentos de alto nível e identidade própria.',
-    storeUrl: 'https://terranovawatches.com',
-    gradient: GRADIENTS[4],
-  },
-];
-
 export function useRecommendations() {
   const { data, loading } = useSheetData('recomendacoes');
 
+  // Sem lista reserva: se a planilha falhar, watches fica vazio e a seção
+  // mostra uma mensagem de indisponibilidade (nunca conteúdo desatualizado).
   const watches = useMemo<Watch[]>(() => {
-    if (data.length === 0) return FALLBACK;
-
     const rows = data.slice(1);
-    const parsed = rows
+    return rows
       .filter((r) => r[0] && r[1])
       .map((r, i) => ({
         brand: r[0] ?? '',
@@ -82,8 +44,6 @@ export function useRecommendations() {
         coupon: r[5] || undefined,
         descriptionEn: r[6] || undefined,
       }));
-
-    return parsed.length > 0 ? parsed : FALLBACK;
   }, [data]);
 
   return { watches, loading };

@@ -42,6 +42,7 @@ const en: Translations = {
     heading: 'Watches recommended',
     subtitle: 'A personal curation of watches that are worth every penny — tested, approved, and recommended with transparency alongside our partners.',
     filterAll: 'All',
+    loadError: 'We could not load the recommendations right now. Please try again in a moment.',
     badge: 'RECOMMENDED',
     visitStore: 'VIEW IN STORE',
     couponLabel: 'COUPON',

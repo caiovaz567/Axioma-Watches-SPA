@@ -106,15 +106,19 @@ function GalleryItem({ w }: { w: Watch }) {
       >
         {imageUrl ? (
           <Box
+            component="img"
             className="watch-img"
-            role="img"
-            aria-label={w.model}
+            src={imageUrl}
+            alt={w.model}
+            loading="lazy"
+            decoding="async"
             sx={{
               position: 'absolute',
               inset: 0,
-              backgroundImage: `url(${imageUrl})`,
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+              objectPosition: 'center',
               backgroundColor: '#f5f4f2',
               transition: 'transform 0.45s ease, filter 0.45s ease',
               transformOrigin: 'center',
@@ -237,8 +241,8 @@ function GalleryItem({ w }: { w: Watch }) {
         >
           {w.model}
         </Typography>
-        {/* Altura fixa (4 linhas) para o botão nunca mudar de posição entre filtros */}
-        <Box sx={{ flex: 1, height: '6rem', overflow: 'hidden' }}>
+        {/* Altura rígida (4 linhas, sem flex) para o botão nunca mudar de posição */}
+        <Box sx={{ height: '6rem', overflow: 'hidden' }}>
           {description && (
             <Typography
               variant="body2"
@@ -359,7 +363,25 @@ export default function Recommendations() {
   const { ref, visible } = useScrollReveal();
   const { t } = useLanguage();
   const { watches, loading } = useRecommendations();
+  // brandFilter destaca o chip na hora; appliedFilter troca a lista depois do
+  // fade-out, para a transição ser suave em vez de piscar.
   const [brandFilter, setBrandFilter] = useState<string | null>(null);
+  const [appliedFilter, setAppliedFilter] = useState<string | null>(null);
+  const [fading, setFading] = useState(false);
+  const fadeTimer = useRef<number | undefined>(undefined);
+
+  const changeFilter = (next: string | null) => {
+    if (next === brandFilter) return;
+    setBrandFilter(next);
+    setFading(true);
+    window.clearTimeout(fadeTimer.current);
+    fadeTimer.current = window.setTimeout(() => {
+      setAppliedFilter(next);
+      setFading(false);
+    }, 120);
+  };
+
+  useEffect(() => () => window.clearTimeout(fadeTimer.current), []);
 
   const brands = useMemo(() => {
     const seen = new Set<string>();
@@ -371,8 +393,8 @@ export default function Recommendations() {
   }, [watches]);
 
   const filtered = useMemo(
-    () => (brandFilter === null ? watches : watches.filter((w) => partnerOf(w) === brandFilter)),
-    [watches, brandFilter]
+    () => (appliedFilter === null ? watches : watches.filter((w) => partnerOf(w) === appliedFilter)),
+    [watches, appliedFilter]
   );
 
   const chipRowRef = useRef<HTMLDivElement>(null);
@@ -473,7 +495,7 @@ export default function Recommendations() {
               label={t.recommendations.filterAll}
               variant="outlined"
               clickable
-              onClick={() => setBrandFilter(null)}
+              onClick={() => changeFilter(null)}
               sx={filterChipSx(brandFilter === null)}
             />
             {brands.map((brand) => (
@@ -482,7 +504,7 @@ export default function Recommendations() {
                 label={brand}
                 variant="outlined"
                 clickable
-                onClick={() => setBrandFilter((prev) => (prev === brand ? null : brand))}
+                onClick={() => changeFilter(brandFilter === brand ? null : brand)}
                 sx={filterChipSx(brandFilter === brand)}
               />
             ))}
@@ -519,7 +541,25 @@ export default function Recommendations() {
           </Box>
         )}
 
-        <Carousel key={brandFilter ?? 'all'} sx={revealSx(visible, 200)}>
+        {!loading && watches.length === 0 && (
+          <Typography
+            sx={{
+              textAlign: 'center',
+              color: 'text.secondary',
+              fontSize: '0.95rem',
+              lineHeight: 1.8,
+              py: 8,
+              px: 4,
+            }}
+          >
+            {t.recommendations.loadError}
+          </Typography>
+        )}
+
+        {(loading || watches.length > 0) && (
+        <Box sx={revealSx(visible, 200)}>
+        <Box sx={{ opacity: fading ? 0 : 1, transition: 'opacity 120ms ease' }}>
+        <Carousel resetToken={appliedFilter}>
           {loading
             ? Array.from({ length: 3 }).map((_, i) => (
                 <Box
@@ -553,6 +593,9 @@ export default function Recommendations() {
               ))
           }
         </Carousel>
+        </Box>
+        </Box>
+        )}
       </Box>
     </Box>
   );

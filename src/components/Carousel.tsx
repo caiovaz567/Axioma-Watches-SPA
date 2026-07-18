@@ -28,9 +28,11 @@ const arrowSx = (enabled: boolean) => ({
 interface CarouselProps {
   children: ReactNode;
   sx?: SxProps<Theme>;
+  /** Quando este valor muda, a rolagem volta ao início (sem remontar os slides) */
+  resetToken?: unknown;
 }
 
-export default function Carousel({ children, sx }: CarouselProps) {
+export default function Carousel({ children, sx, resetToken }: CarouselProps) {
   const trackRef = useRef<HTMLDivElement>(null);
   const barRef = useRef<HTMLDivElement>(null);
   const draggingRef = useRef(false);
@@ -71,6 +73,11 @@ export default function Carousel({ children, sx }: CarouselProps) {
       ro.disconnect();
     };
   }, [updateScrollState, children]);
+
+  useEffect(() => {
+    trackRef.current?.scrollTo({ left: 0 });
+    updateScrollState();
+  }, [resetToken, updateScrollState]);
 
   const scroll = (dir: 'left' | 'right') => {
     const el = trackRef.current;

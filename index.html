@@ -7,16 +7,28 @@
     <meta name="description" content="Axioma Watches — Canal de relojoaria quartz e mecânica automática por Claudio Vaz. Informação verdadeira sobre relógios." />
     <title>Axioma Watches</title>
 
+    <!-- pt-BR no .com.br, inglês no .com — mesmo site, idiomas alternativos.
+         Sem www: é a forma primária servida pelo Vercel (www.com redireciona p/ apex). -->
+    <link rel="alternate" hreflang="pt-BR" href="https://axiomawatches.com.br/" />
+    <link rel="alternate" hreflang="en" href="https://axiomawatches.com/" />
+    <link rel="alternate" hreflang="x-default" href="https://axiomawatches.com.br/" />
+    <script>
+      // Canônica dinâmica: cada domínio (pt/en) aponta para si mesmo
+      var canonical = document.createElement('link');
+      canonical.rel = 'canonical';
+      canonical.href = location.origin + '/';
+      document.head.appendChild(canonical);
+    </script>
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="Axioma Watches" />
     <meta property="og:title" content="Axioma Watches" />
     <meta property="og:description" content="Canal de relojoaria quartz e mecânica automática por Claudio Vaz. Informação verdadeira sobre relógios." />
     <meta property="og:locale" content="pt_BR" />
-    <meta property="og:image" content="/og-cover.png" />
+    <meta property="og:image" content="https://axiomawatches.com.br/og-cover.png" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="Axioma Watches" />
     <meta name="twitter:description" content="Canal de relojoaria quartz e mecânica automática por Claudio Vaz. Informação verdadeira sobre relógios." />
-    <meta name="twitter:image" content="/og-cover.png" />
+    <meta name="twitter:image" content="https://axiomawatches.com.br/og-cover.png" />
 
     <link rel="preload" as="image" href="/hero-bg.jpg" fetchpriority="high" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
