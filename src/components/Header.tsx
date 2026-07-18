@@ -58,8 +58,16 @@ export default function Header() {
   const { t, lang, setLang } = useLanguage();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [activeSection, setActiveSection] = useState<string>('');
+  const [scrolled, setScrolled] = useState(false);
   const isScrolling = useRef(false);
   const scrollTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 24);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
 
   const navLinks = [
     { label: t.nav.about, id: '#about' },
@@ -127,9 +135,12 @@ export default function Header() {
         position="fixed"
         elevation={0}
         sx={{
-          backgroundColor: 'rgba(13,14,17,0.88)',
-          backdropFilter: 'blur(12px)',
-          borderBottom: '1px solid rgba(201,168,76,0.12)',
+          backgroundColor: scrolled ? 'rgba(13,14,17,0.92)' : 'transparent',
+          backdropFilter: scrolled ? 'blur(12px)' : 'none',
+          borderBottom: '1px solid',
+          borderBottomColor: scrolled ? 'rgba(201,168,76,0.18)' : 'transparent',
+          boxShadow: scrolled ? '0 12px 40px rgba(0,0,0,0.45)' : 'none',
+          transition: 'background-color 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease, backdrop-filter 0.35s ease',
         }}
       >
         <Toolbar sx={{ justifyContent: 'space-between', px: { xs: 2, md: 6 }, minHeight: { xs: 56, sm: 64 } }}>
