@@ -32,14 +32,30 @@ interface CarouselProps {
 
 export default function Carousel({ children, sx }: CarouselProps) {
   const trackRef = useRef<HTMLDivElement>(null);
+  const barRef = useRef<HTMLDivElement>(null);
+  const draggingRef = useRef(false);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
+  const [bar, setBar] = useState({ start: 0, size: 1 });
 
   const updateScrollState = useCallback(() => {
     const el = trackRef.current;
     if (!el) return;
     setCanScrollLeft(el.scrollLeft > 1);
     setCanScrollRight(el.scrollLeft < el.scrollWidth - el.clientWidth - 1);
+    setBar({
+      start: el.scrollWidth > 0 ? el.scrollLeft / el.scrollWidth : 0,
+      size: el.scrollWidth > 0 ? el.clientWidth / el.scrollWidth : 1,
+    });
+  }, []);
+
+  const seek = useCallback((clientX: number) => {
+    const el = trackRef.current;
+    const barEl = barRef.current;
+    if (!el || !barEl) return;
+    const rect = barEl.getBoundingClientRect();
+    const frac = (clientX - rect.left) / rect.width;
+    el.scrollLeft = frac * el.scrollWidth - el.clientWidth / 2;
   }, []);
 
   useEffect(() => {
@@ -63,12 +79,8 @@ export default function Carousel({ children, sx }: CarouselProps) {
   };
 
   return (
-    <Box
-      sx={[
-        { display: 'flex', alignItems: 'center', gap: { md: 2 } },
-        ...(Array.isArray(sx) ? sx : [sx]),
-      ]}
-    >
+    <Box sx={[{}, ...(Array.isArray(sx) ? sx : [sx])]}>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: { md: 2 } }}>
       <IconButton
         onClick={() => scroll('left')}
         disabled={!canScrollLeft}
@@ -104,6 +116,54 @@ export default function Carousel({ children, sx }: CarouselProps) {
       >
         <ChevronRightIcon />
       </IconButton>
+      </Box>
+
+      {/* Espaço da barra sempre reservado para a altura da seção não pular ao filtrar */}
+      <Box
+        ref={barRef}
+        style={{ visibility: bar.size < 0.999 ? 'visible' : 'hidden' }}
+          onPointerDown={(e) => {
+            draggingRef.current = true;
+            barRef.current?.setPointerCapture(e.pointerId);
+            seek(e.clientX);
+          }}
+        onPointerMove={(e) => {
+          if (draggingRef.current) seek(e.clientX);
+        }}
+        onPointerUp={() => {
+          draggingRef.current = false;
+        }}
+        sx={{
+          mt: { xs: 3.5, md: 4 },
+          mx: 'auto',
+          width: { xs: 140, md: 180 },
+          py: 1,
+          cursor: 'pointer',
+          touchAction: 'none',
+        }}
+      >
+        <Box
+          sx={{
+            position: 'relative',
+            height: 3,
+            borderRadius: 2,
+            backgroundColor: 'rgba(255,255,255,0.08)',
+            overflow: 'hidden',
+          }}
+        >
+          <Box
+            sx={{
+              position: 'absolute',
+              top: 0,
+              bottom: 0,
+              left: `${bar.start * 100}%`,
+              width: `${bar.size * 100}%`,
+              borderRadius: 2,
+              backgroundColor: 'rgba(201,168,76,0.6)',
+            }}
+          />
+        </Box>
+      </Box>
     </Box>
   );
 }

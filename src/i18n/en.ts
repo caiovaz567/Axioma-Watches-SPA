@@ -41,6 +41,7 @@ const en: Translations = {
     label: 'RECOMMENDATIONS',
     heading: 'Watches recommended',
     subtitle: 'A personal curation of watches that are worth every penny — tested, approved, and recommended with transparency alongside our partners.',
+    filterAll: 'All',
     badge: 'RECOMMENDED',
     visitStore: 'VIEW IN STORE',
     couponLabel: 'COUPON',

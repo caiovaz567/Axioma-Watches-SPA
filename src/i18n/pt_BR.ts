@@ -41,6 +41,7 @@ const pt_BR: Translations = {
     label: 'RECOMENDAÇÕES',
     heading: 'Relógios recomendados',
     subtitle: 'Uma curadoria pessoal de relógios que valem cada centavo — testados, aprovados e indicados com transparência junto aos nossos parceiros.',
+    filterAll: 'Todas',
     badge: 'RECOMENDADO',
     visitStore: 'VER NA LOJA',
     couponLabel: 'CUPOM',

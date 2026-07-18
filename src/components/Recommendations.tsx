@@ -1,6 +1,8 @@
-import { useState } from 'react';
-import { Box, Typography, Skeleton, Tooltip } from '@mui/material';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Box, Chip, Typography, Skeleton, Tooltip } from '@mui/material';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import CheckIcon from '@mui/icons-material/Check';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import Carousel from './Carousel';
@@ -213,6 +215,9 @@ function GalleryItem({ w }: { w: Watch }) {
             color: 'primary.main',
             fontWeight: 600,
             mb: 0.5,
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
           }}
         >
           {w.brand.toUpperCase()}
@@ -225,11 +230,15 @@ function GalleryItem({ w }: { w: Watch }) {
             color: '#EBEBEB',
             lineHeight: 1.3,
             mb: 1,
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
           }}
         >
           {w.model}
         </Typography>
-        <Box sx={{ flex: 1, minHeight: '5rem' }}>
+        {/* Altura fixa (4 linhas) para o botão nunca mudar de posição entre filtros */}
+        <Box sx={{ flex: 1, height: '6rem', overflow: 'hidden' }}>
           {description && (
             <Typography
               variant="body2"
@@ -237,7 +246,10 @@ function GalleryItem({ w }: { w: Watch }) {
                 color: 'text.secondary',
                 fontSize: '0.88rem',
                 lineHeight: 1.7,
-                mb: 1.5,
+                display: '-webkit-box',
+                WebkitLineClamp: 4,
+                WebkitBoxOrient: 'vertical',
+                overflow: 'hidden',
               }}
             >
               {description}
@@ -306,10 +318,79 @@ function GalleryItemSkeleton() {
   );
 }
 
+const PARTNER_NAMES: Record<string, string> = {
+  'terranovawatches.com': 'Terra Nova',
+  'relojoariaimpala.com.br': 'Impala',
+  'rouewatch.com.br': 'ROUE',
+  'valliwatches.com.br': 'Valli',
+};
+
+function partnerOf(w: Watch): string {
+  try {
+    const host = new URL(w.storeUrl).hostname.replace(/^www\./, '');
+    if (PARTNER_NAMES[host]) return PARTNER_NAMES[host];
+    const label = host.split('.')[0];
+    return label.charAt(0).toUpperCase() + label.slice(1);
+  } catch {
+    return w.brand.split('-')[0].trim();
+  }
+}
+
+const filterChipSx = (active: boolean) => ({
+  flexShrink: 0,
+  fontFamily: '"Inter", sans-serif',
+  fontSize: '0.65rem',
+  letterSpacing: '0.18em',
+  textTransform: 'uppercase' as const,
+  height: 34,
+  borderRadius: '17px',
+  px: 0.5,
+  color: active ? 'primary.main' : 'rgba(255,255,255,0.55)',
+  borderColor: active ? 'rgba(201,168,76,0.6)' : 'rgba(255,255,255,0.15)',
+  backgroundColor: active ? 'rgba(201,168,76,0.08)' : 'transparent',
+  transition: 'all 0.2s',
+  '&:hover': {
+    borderColor: active ? 'primary.main' : 'rgba(255,255,255,0.35)',
+    backgroundColor: active ? 'rgba(201,168,76,0.12)' : 'rgba(255,255,255,0.04)',
+  },
+});
+
 export default function Recommendations() {
   const { ref, visible } = useScrollReveal();
   const { t } = useLanguage();
   const { watches, loading } = useRecommendations();
+  const [brandFilter, setBrandFilter] = useState<string | null>(null);
+
+  const brands = useMemo(() => {
+    const seen = new Set<string>();
+    for (const w of watches) {
+      const name = partnerOf(w);
+      if (name) seen.add(name);
+    }
+    return Array.from(seen);
+  }, [watches]);
+
+  const filtered = useMemo(
+    () => (brandFilter === null ? watches : watches.filter((w) => partnerOf(w) === brandFilter)),
+    [watches, brandFilter]
+  );
+
+  const chipRowRef = useRef<HTMLDivElement>(null);
+  const [chipHint, setChipHint] = useState({ left: false, right: false });
+  const updateChipHint = useCallback(() => {
+    const el = chipRowRef.current;
+    if (!el) return;
+    setChipHint({
+      left: el.scrollLeft > 1,
+      right: el.scrollLeft < el.scrollWidth - el.clientWidth - 1,
+    });
+  }, []);
+
+  useEffect(() => {
+    updateChipHint();
+    window.addEventListener('resize', updateChipHint);
+    return () => window.removeEventListener('resize', updateChipHint);
+  }, [brands, loading, updateChipHint]);
 
   return (
     <Box
@@ -363,7 +444,82 @@ export default function Recommendations() {
           </Typography>
         </Box>
 
-        <Carousel sx={revealSx(visible, 200)}>
+        {!loading && brands.length >= 2 && (
+          <Box
+            sx={{
+              ...revealSx(visible, 150),
+              position: 'relative',
+              mb: { xs: 4, md: 5 },
+              mx: { xs: -4, sm: -6, md: 'auto' },
+              maxWidth: { md: 900 },
+            }}
+          >
+          <Box
+            ref={chipRowRef}
+            onScroll={updateChipHint}
+            sx={{
+              px: { xs: 4, sm: 6, md: 0 },
+              display: 'flex',
+              gap: 1.25,
+              flexWrap: { xs: 'nowrap', md: 'wrap' },
+              overflowX: { xs: 'auto', md: 'visible' },
+              justifyContent: { xs: 'flex-start', md: 'center' },
+              '&::-webkit-scrollbar': { display: 'none' },
+              msOverflowStyle: 'none',
+              scrollbarWidth: 'none',
+            }}
+          >
+            <Chip
+              label={t.recommendations.filterAll}
+              variant="outlined"
+              clickable
+              onClick={() => setBrandFilter(null)}
+              sx={filterChipSx(brandFilter === null)}
+            />
+            {brands.map((brand) => (
+              <Chip
+                key={brand}
+                label={brand}
+                variant="outlined"
+                clickable
+                onClick={() => setBrandFilter((prev) => (prev === brand ? null : brand))}
+                sx={filterChipSx(brandFilter === brand)}
+              />
+            ))}
+          </Box>
+
+          {([
+            ['left', chipHint.left, 'to right'],
+            ['right', chipHint.right, 'to left'],
+          ] as const).map(([side, on, dir]) => (
+            <Box
+              key={side}
+              sx={{
+                position: 'absolute',
+                [side]: 0,
+                top: 0,
+                bottom: 0,
+                width: 56,
+                pointerEvents: 'none',
+                background: `linear-gradient(${dir}, #0D0E11 30%, rgba(13,14,17,0))`,
+                opacity: on ? 1 : 0,
+                transition: 'opacity 0.25s',
+                display: { xs: 'flex', md: 'none' },
+                alignItems: 'center',
+                justifyContent: side === 'left' ? 'flex-start' : 'flex-end',
+              }}
+            >
+              {side === 'left' ? (
+                <ChevronLeftIcon sx={{ fontSize: 20, color: 'primary.main' }} />
+              ) : (
+                <ChevronRightIcon sx={{ fontSize: 20, color: 'primary.main' }} />
+              )}
+            </Box>
+          ))}
+          </Box>
+        )}
+
+        <Carousel key={brandFilter ?? 'all'} sx={revealSx(visible, 200)}>
           {loading
             ? Array.from({ length: 3 }).map((_, i) => (
                 <Box
@@ -379,9 +535,9 @@ export default function Recommendations() {
                   <GalleryItemSkeleton />
                 </Box>
               ))
-            : watches.map((w, i) => (
+            : filtered.map((w) => (
                 <Box
-                  key={i}
+                  key={`${w.model}-${w.storeUrl}`}
                   data-carousel-item
                   sx={{
                     flex: '0 0 auto',
