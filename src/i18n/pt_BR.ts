@@ -41,7 +41,7 @@ const pt_BR: Translations = {
     label: 'RECOMENDAÇÕES',
     heading: 'Relógios recomendados',
     subtitle: 'Uma curadoria pessoal de relógios que valem cada centavo — testados, aprovados e indicados com transparência junto aos nossos parceiros.',
-    filterAll: 'Todas',
+    filterAll: 'Todos',
     loadError: 'Não foi possível carregar as recomendações agora. Tente novamente em instantes.',
     badge: 'RECOMENDADO',
     visitStore: 'VER NA LOJA',
