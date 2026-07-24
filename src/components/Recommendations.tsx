@@ -6,6 +6,7 @@ import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import CheckIcon from '@mui/icons-material/Check';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import Carousel from './Carousel';
+import SectionHeading from './SectionHeading';
 import { useScrollReveal, revealSx } from '../hooks/useScrollReveal';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useRecommendations } from '../hooks/useRecommendations';
@@ -84,6 +85,9 @@ function GalleryItem({ w }: { w: Watch }) {
         </Box>
       )}
 
+      {/* O cupom é irmão do link, não filho: botão dentro de <a> é HTML inválido
+          e confunde leitor de tela. */}
+      <Box sx={{ position: 'relative', aspectRatio: '1/1', clipPath: 'inset(0 round 8px)' }}>
       <Box
         component={w.storeUrl ? 'a' : 'div'}
         href={w.storeUrl || undefined}
@@ -91,10 +95,9 @@ function GalleryItem({ w }: { w: Watch }) {
         rel="noopener noreferrer"
         sx={{
           display: 'block',
-          position: 'relative',
-          aspectRatio: '1/1',
+          position: 'absolute',
+          inset: 0,
           textDecoration: 'none',
-          clipPath: 'inset(0 round 8px)',
           willChange: 'transform',
           '@media (hover: hover)': {
             '&:hover .watch-img': {
@@ -157,6 +160,7 @@ function GalleryItem({ w }: { w: Watch }) {
             </Typography>
           </Box>
         )}
+      </Box>
 
         {w.coupon && (
           <Tooltip
@@ -174,7 +178,7 @@ function GalleryItem({ w }: { w: Watch }) {
               }}
               role="button"
               tabIndex={0}
-              aria-label={`Copiar cupom ${w.coupon}`}
+              aria-label={`${t.a11y.copyCoupon} ${w.coupon}`}
               sx={{
                 position: 'absolute',
                 bottom: 12,
@@ -193,6 +197,7 @@ function GalleryItem({ w }: { w: Watch }) {
                 userSelect: 'none',
                 transition: 'border-color 0.2s',
                 '&:hover': { borderColor: 'rgba(201,168,76,0.9)' },
+                '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.main', outlineOffset: 2 },
               }}
             >
               <Typography sx={{ fontSize: '0.52rem', letterSpacing: '0.18em', color: 'rgba(255,255,255,0.45)', fontFamily: '"Inter", sans-serif', fontWeight: 500 }}>
@@ -288,6 +293,7 @@ function GalleryItem({ w }: { w: Watch }) {
               borderColor: 'primary.main',
               backgroundColor: 'rgba(201,168,76,0.1)',
             },
+            '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.main', outlineOffset: 2 },
           }}
         >
           {t.recommendations.visitStore}
@@ -349,6 +355,9 @@ const filterChipSx = (active: boolean) => ({
   height: 34,
   borderRadius: '17px',
   px: 0.5,
+  // Mesmo ajuste ótico dos títulos: sem isso o tracking joga o texto do chip
+  // para a esquerda dentro da pílula.
+  '& .MuiChip-label': { textIndent: '0.18em' },
   color: active ? 'primary.main' : 'rgba(255,255,255,0.55)',
   borderColor: active ? 'rgba(201,168,76,0.6)' : 'rgba(255,255,255,0.15)',
   backgroundColor: active ? 'rgba(201,168,76,0.08)' : 'transparent',
@@ -425,47 +434,13 @@ export default function Recommendations() {
       }}
     >
       <Box ref={ref} sx={{ maxWidth: 1600, mx: 'auto', px: { xs: 4, sm: 6, md: 6 } }}>
-        <Box sx={{ mb: { xs: 8, md: 10 }, textAlign: 'center' }}>
-          <Typography
-            sx={{
-              ...revealSx(visible, 0),
-              color: 'primary.main',
-              fontSize: '0.78rem',
-              letterSpacing: '0.35em',
-              mb: 2,
-              fontFamily: '"Inter", sans-serif',
-            }}
-          >
-            {t.recommendations.label}
-          </Typography>
-          <Typography
-            variant="h3"
-            sx={{
-              ...revealSx(visible, 60),
-              fontFamily: '"Inter", sans-serif',
-              fontSize: { xs: '2rem', md: '2.6rem' },
-              fontWeight: 700,
-              color: '#EBEBEB',
-              lineHeight: 1.2,
-              mt: 1.5,
-              mb: 2,
-            }}
-          >
-            {t.recommendations.heading}
-          </Typography>
-          <Typography
-            variant="body2"
-            sx={{
-              ...revealSx(visible, 100),
-              color: 'text.secondary',
-              maxWidth: 520,
-              mx: 'auto',
-              lineHeight: 1.8,
-            }}
-          >
-            {t.recommendations.subtitle}
-          </Typography>
-        </Box>
+        <SectionHeading
+          label={t.recommendations.label}
+          heading={t.recommendations.heading}
+          subtitle={t.recommendations.subtitle}
+          visible={visible}
+          sx={{ mb: { xs: 8, md: 10 } }}
+        />
 
         {!loading && brands.length >= 2 && (
           <Box
@@ -568,7 +543,7 @@ export default function Recommendations() {
                   data-carousel-item
                   sx={{
                     flex: '0 0 auto',
-                    width: { xs: '100%', sm: '50%', md: 'calc(33.333%)' },
+                    width: { xs: '85%', sm: '50%', md: 'calc(33.333%)' },
                     scrollSnapAlign: 'start',
                     px: 1.5,
                   }}
@@ -582,7 +557,7 @@ export default function Recommendations() {
                   data-carousel-item
                   sx={{
                     flex: '0 0 auto',
-                    width: { xs: '100%', sm: '50%', md: 'calc(33.333%)' },
+                    width: { xs: '85%', sm: '50%', md: 'calc(33.333%)' },
                     scrollSnapAlign: 'start',
                     px: 1.5,
                     display: 'flex',

@@ -4,6 +4,7 @@ import { Box, IconButton } from '@mui/material';
 import type { SxProps, Theme } from '@mui/material/styles';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import { useLanguage } from '../contexts/LanguageContext';
 
 const arrowSx = (enabled: boolean) => ({
   flexShrink: 0,
@@ -33,6 +34,7 @@ interface CarouselProps {
 }
 
 export default function Carousel({ children, sx, resetToken }: CarouselProps) {
+  const { t } = useLanguage();
   const trackRef = useRef<HTMLDivElement>(null);
   const barRef = useRef<HTMLDivElement>(null);
   const draggingRef = useRef(false);
@@ -91,7 +93,7 @@ export default function Carousel({ children, sx, resetToken }: CarouselProps) {
       <IconButton
         onClick={() => scroll('left')}
         disabled={!canScrollLeft}
-        aria-label="Anterior"
+        aria-label={t.a11y.carouselPrev}
         sx={arrowSx(canScrollLeft)}
       >
         <ChevronLeftIcon />
@@ -118,7 +120,7 @@ export default function Carousel({ children, sx, resetToken }: CarouselProps) {
       <IconButton
         onClick={() => scroll('right')}
         disabled={!canScrollRight}
-        aria-label="Próximo"
+        aria-label={t.a11y.carouselNext}
         sx={arrowSx(canScrollRight)}
       >
         <ChevronRightIcon />

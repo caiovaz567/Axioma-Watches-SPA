@@ -147,7 +147,7 @@ export default function Header() {
 
           <ButtonBase
             onClick={() => scrollTo('#hero')}
-            aria-label="Voltar ao início"
+            aria-label={t.a11y.home}
             sx={{ display: 'flex', alignItems: 'center', gap: 1.5, cursor: 'pointer', userSelect: 'none' }}
           >
             <Box

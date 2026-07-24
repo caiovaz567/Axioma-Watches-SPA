@@ -101,8 +101,15 @@ const pt_BR: Translations = {
   footer: {
     by: 'Por Claudio Vaz',
     tagline: 'Espaço voltado para a boa relojoaria sempre.',
+    rights: 'Todos os direitos reservados.',
   },
   backToTop: 'Voltar ao topo',
+  a11y: {
+    home: 'Voltar ao início',
+    carouselPrev: 'Anterior',
+    carouselNext: 'Próximo',
+    copyCoupon: 'Copiar cupom',
+  },
 };
 
 export default pt_BR;

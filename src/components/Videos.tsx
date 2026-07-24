@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { Box, Typography } from '@mui/material';
+import { Box } from '@mui/material';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+import SectionHeading from './SectionHeading';
 import { useScrollReveal, revealSx } from '../hooks/useScrollReveal';
 import { useVideoConfig } from '../hooks/useVideoConfig';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -10,57 +11,34 @@ export default function Videos() {
   const { videoId } = useVideoConfig();
   const { t } = useLanguage();
   const [playing, setPlaying] = useState(false);
+  // maxres é 16:9 e nítido, mas nem todo vídeo tem. Quando não tem, o YouTube
+  // responde 404 com o placeholder cinza 120x90 no corpo — a imagem "carrega"
+  // normalmente e onError nunca dispara. Por isso a checagem é pelo tamanho real.
+  const [thumb, setThumb] = useState({ id: videoId, hiRes: true });
+  // Troca de vídeo reinicia a tentativa em alta resolução
+  if (thumb.id !== videoId) setThumb({ id: videoId, hiRes: true });
+  const setHiRes = (hiRes: boolean) => setThumb({ id: videoId, hiRes });
+  const thumbUrl = `https://img.youtube.com/vi/${videoId}/${thumb.hiRes ? 'maxresdefault' : 'sddefault'}.jpg`;
 
   return (
     <Box
       id="videos"
       sx={{
-        py: { xs: 8, md: 10 },
-        px: { xs: 2, md: 4 },
+        py: { xs: 10, md: 14 },
+        px: { xs: 4, sm: 6, md: 6 },
         backgroundColor: '#0D0E11',
         borderTop: '1px solid rgba(201,168,76,0.08)',
         scrollMarginTop: { xs: 72, md: 96 },
       }}
     >
       <Box ref={ref} sx={{ maxWidth: 1200, mx: 'auto', ...revealSx(visible) }}>
-        <Box sx={{ mb: { xs: 6, md: 8 }, textAlign: 'center' }}>
-          <Typography
-            sx={{
-              ...revealSx(visible, 0),
-              color: 'primary.main',
-              fontSize: '0.78rem',
-              letterSpacing: '0.35em',
-              mb: 2,
-              fontFamily: '"Inter", sans-serif',
-            }}
-          >
-            {t.videos.label}
-          </Typography>
-          <Typography
-            variant="h2"
-            sx={{
-              ...revealSx(visible, 100),
-              fontSize: { xs: '2rem', md: '2.6rem' },
-              color: '#EBEBEB',
-              lineHeight: 1.2,
-            }}
-          >
-            {t.videos.heading}
-          </Typography>
-          <Typography
-            variant="body2"
-            sx={{
-              ...revealSx(visible, 200),
-              color: 'text.secondary',
-              mt: 2,
-              maxWidth: 480,
-              mx: 'auto',
-              lineHeight: 1.8,
-            }}
-          >
-            {t.videos.subtitle}
-          </Typography>
-        </Box>
+        <SectionHeading
+          label={t.videos.label}
+          heading={t.videos.heading}
+          subtitle={t.videos.subtitle}
+          visible={visible}
+          sx={{ mb: { xs: 8, md: 10 } }}
+        />
         <Box
           sx={{
             position: 'relative',
@@ -71,6 +49,17 @@ export default function Videos() {
             boxShadow: '0 16px 48px rgba(0,0,0,0.5)',
             cursor: playing ? 'default' : 'pointer',
             backgroundColor: '#111',
+            // O overlay do play cobre a thumbnail inteira, então quem comanda os
+            // dois efeitos de hover é o container — senão a imagem nunca é hovered.
+            '@media (hover: hover)': {
+              '&:hover .video-thumb': { filter: 'brightness(0.55)' },
+              '&:hover .video-play': { transform: 'scale(1.1)', backgroundColor: 'rgba(201,168,76,1)' },
+            },
+            '&:focus-visible': {
+              outline: '2px solid',
+              outlineColor: 'primary.main',
+              outlineOffset: 3,
+            },
           }}
           onClick={() => !playing && setPlaying(true)}
           onKeyDown={(e: React.KeyboardEvent) => {
@@ -101,7 +90,13 @@ export default function Videos() {
             <>
               <Box
                 component="img"
-                src={`https://img.youtube.com/vi/${videoId}/sddefault.jpg`}
+                className="video-thumb"
+                src={thumbUrl}
+                onLoad={(e: React.SyntheticEvent<HTMLImageElement>) => {
+                  // 120px de largura = placeholder cinza do YouTube, não a capa real
+                  if (e.currentTarget.naturalWidth <= 121) setHiRes(false);
+                }}
+                onError={() => setHiRes(false)}
                 alt="Axioma Watches"
                 sx={{
                   position: 'absolute',
@@ -110,7 +105,6 @@ export default function Videos() {
                   objectFit: 'cover',
                   filter: 'brightness(0.75)',
                   transition: 'filter 0.3s',
-                  '&:hover': { filter: 'brightness(0.6)' },
                 }}
               />
               <Box
@@ -123,6 +117,7 @@ export default function Videos() {
                 }}
               >
                 <Box
+                  className="video-play"
                   sx={{
                     width: { xs: 64, md: 80 },
                     height: { xs: 64, md: 80 },
@@ -133,10 +128,6 @@ export default function Videos() {
                     justifyContent: 'center',
                     boxShadow: '0 4px 32px rgba(0,0,0,0.6)',
                     transition: 'transform 0.2s, background-color 0.2s',
-                    '&:hover': {
-                      transform: 'scale(1.1)',
-                      backgroundColor: 'rgba(201,168,76,1)',
-                    },
                   }}
                 >
                   <PlayArrowIcon sx={{ color: '#0D0E11', fontSize: { xs: '2.2rem', md: '2.8rem' } }} />

@@ -4,6 +4,7 @@ import CheckIcon from '@mui/icons-material/Check';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import Carousel from './Carousel';
+import SectionHeading from './SectionHeading';
 import impalaImg from '../assets/banner-empresa-1170x305.jpg';
 import terranovaImg from '../assets/d86c3fa9-b022-4d13-91d7-b2246a746426_logo-azul-jpg.jpg';
 import roueImg from '../assets/roue_logo.svg';
@@ -91,7 +92,7 @@ function PartnershipCard({ p }: { p: Partnership }) {
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
-      {/* Video area */}
+      {/* Arte do parceiro — apresentação apenas, sem ação */}
       <Box
         sx={{
           position: 'relative',
@@ -107,6 +108,7 @@ function PartnershipCard({ p }: { p: Partnership }) {
             component="img"
             src={thumbnail}
             alt={p.name}
+            loading="lazy"
             sx={{
               position: 'absolute', inset: 0,
               width: '100%', height: '100%',
@@ -169,7 +171,7 @@ function PartnershipCard({ p }: { p: Partnership }) {
               }}
               role="button"
               tabIndex={0}
-              aria-label={`Copiar cupom ${p.coupon}`}
+              aria-label={`${t.a11y.copyCoupon} ${p.coupon}`}
               sx={{
                 display: 'inline-flex', alignItems: 'center', gap: 1,
                 px: 1.75, py: 1,
@@ -185,6 +187,7 @@ function PartnershipCard({ p }: { p: Partnership }) {
                   backgroundColor: copied ? 'rgba(76,175,80,0.12)' : 'rgba(201,168,76,0.08)',
                 },
                 '&:active': { transform: 'scale(0.97)' },
+                '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.main', outlineOffset: 2 },
               }}
             >
               {copied ? (
@@ -220,6 +223,7 @@ function PartnershipCard({ p }: { p: Partnership }) {
               borderBottom: '1px solid rgba(255,255,255,0.1)', pb: 0.5,
               transition: 'color 0.2s, border-color 0.2s',
               '&:hover': { color: '#EBEBEB', borderColor: 'rgba(255,255,255,0.3)' },
+              '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.main', outlineOffset: 4, borderRadius: '2px' },
             }}
           >
             <OpenInNewIcon sx={{ fontSize: '0.85rem' }} />
@@ -247,45 +251,18 @@ export default function Partnerships() {
     >
       <Box ref={ref} sx={{ maxWidth: 1600, mx: 'auto', px: { xs: 4, sm: 6, md: 6 } }}>
 
-        <Box sx={{ mb: { xs: 8, md: 10 }, textAlign: 'center' }}>
-          <Typography
-            sx={{
-              ...revealSx(visible, 0),
-              color: 'primary.main',
-              fontSize: '0.78rem',
-              letterSpacing: '0.35em',
-              mb: 2,
-              fontFamily: '"Inter", sans-serif',
-            }}
-          >
-            {t.partnerships.label}
-          </Typography>
-          <Typography
-            variant="h2"
-            sx={{
-              ...revealSx(visible, 100),
-              fontSize: { xs: '2rem', md: '2.6rem' },
-              color: '#EBEBEB',
-              lineHeight: 1.2,
-            }}
-          >
-            {t.partnerships.headingPart1}{' '}
-            <Box component="span" sx={{ color: 'primary.main' }}>{t.partnerships.headingPart2}</Box>
-          </Typography>
-          <Typography
-            variant="body2"
-            sx={{
-              ...revealSx(visible, 200),
-              color: 'text.secondary',
-              mt: 2,
-              maxWidth: 480,
-              mx: 'auto',
-              lineHeight: 1.8,
-            }}
-          >
-            {t.partnerships.subtitle}
-          </Typography>
-        </Box>
+        <SectionHeading
+          label={t.partnerships.label}
+          heading={
+            <>
+              {t.partnerships.headingPart1}{' '}
+              <Box component="span" sx={{ color: 'primary.main' }}>{t.partnerships.headingPart2}</Box>
+            </>
+          }
+          subtitle={t.partnerships.subtitle}
+          visible={visible}
+          sx={{ mb: { xs: 8, md: 10 } }}
+        />
 
         <Carousel sx={revealSx(visible, 300)}>
           {PARTNERSHIPS.map((p, i) => (
@@ -293,7 +270,9 @@ export default function Partnerships() {
               key={i}
               sx={{
                 flex: '0 0 auto',
-                width: { xs: '85%', sm: '50%', md: '50%' },
+                // Em telas largas 2 cards deixavam a arte gigante e a linha vazia;
+                // 3 preenchem exatamente a fileira de parceiros.
+                width: { xs: '85%', sm: '50%', lg: '33.333%' },
                 scrollSnapAlign: 'start',
                 px: 1.5,
                 display: 'flex',

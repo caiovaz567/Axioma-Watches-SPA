@@ -84,7 +84,7 @@ export default function Footer() {
         variant="body2"
         sx={{ textAlign: 'center', color: 'text.secondary', opacity: 0.4, fontSize: '0.75rem' }}
       >
-        © {new Date().getFullYear()} Axioma Watches — Claudio Vaz. Todos os direitos reservados.
+        © {new Date().getFullYear()} Axioma Watches — Claudio Vaz. {t.footer.rights}
       </Typography>
     </Box>
   );

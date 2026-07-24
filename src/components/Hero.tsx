@@ -108,7 +108,9 @@ export default function Hero() {
             ...revealSx(visible, 100),
             fontFamily: '"Playfair Display", "Georgia", serif',
             fontWeight: 700,
-            fontSize: { xs: '4.2rem', sm: '6.5rem', md: '8.5rem', lg: '9.5rem' },
+            // Fluido no mobile: em telas de ~320px o tamanho fixo estourava a margem
+            // e era cortado pelo overflow-x hidden do App.
+            fontSize: { xs: 'clamp(3rem, 17vw, 4.2rem)', sm: '6.5rem', md: '8.5rem', lg: '9.5rem' },
             lineHeight: 0.92,
             color: '#F4F2ED',
             textShadow: '0 4px 60px rgba(0,0,0,0.6)',
@@ -146,21 +148,30 @@ export default function Hero() {
           {t.hero.description}
         </Typography>
 
-        <Typography
+        {/* Fio dourado à esquerda: trata a tagline como citação e ecoa os
+            pilares do "Sobre", que usam o mesmo recurso. */}
+        <Box
           sx={{
             ...revealSx(visible, 380),
-            fontFamily: '"Inter", sans-serif',
-            fontStyle: 'italic',
-            fontSize: { xs: '0.85rem', md: '0.9rem' },
-            color: 'primary.light',
-            lineHeight: 1.8,
-            opacity: 0.75,
+            borderLeft: '1px solid rgba(201,168,76,0.35)',
+            pl: 2.5,
             mb: { xs: 5, md: 6 },
             maxWidth: 520,
           }}
         >
-          {t.hero.tagline}
-        </Typography>
+          <Typography
+            sx={{
+              fontFamily: '"Inter", sans-serif',
+              fontStyle: 'italic',
+              fontSize: { xs: '0.85rem', md: '0.9rem' },
+              color: 'primary.light',
+              lineHeight: 1.8,
+              opacity: 0.75,
+            }}
+          >
+            {t.hero.tagline}
+          </Typography>
+        </Box>
 
         <Box sx={{ ...revealSx(visible, 460), display: 'flex', flexWrap: 'wrap', gap: 2 }}>
           <Button
@@ -181,6 +192,24 @@ export default function Hero() {
           </Button>
         </Box>
       </Box>
+
+      {/* Indicador de rolagem — só em telas altas o suficiente para caber */}
+      <Box
+        aria-hidden
+        className="scroll-cue"
+        sx={{
+          position: 'absolute',
+          bottom: 28,
+          left: '50%',
+          ml: '-0.5px',
+          width: '1px',
+          height: 44,
+          display: { xs: 'none', md: 'block' },
+          background: 'linear-gradient(to bottom, rgba(201,168,76,0.9), rgba(201,168,76,0))',
+          animation: 'scrollCue 2.6s ease-in-out infinite',
+          zIndex: 2,
+        }}
+      />
     </Box>
   );
 }

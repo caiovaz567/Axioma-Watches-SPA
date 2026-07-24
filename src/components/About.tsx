@@ -1,4 +1,5 @@
 import { Box, Typography } from '@mui/material';
+import SectionHeading from './SectionHeading';
 import { useScrollReveal, revealSx } from '../hooks/useScrollReveal';
 import { useLanguage } from '../contexts/LanguageContext';
 import aboutImg from '../assets/about.jpg';
@@ -9,7 +10,7 @@ export default function About() {
   const { pillars } = t.about;
 
   return (
-    <Box id="about" sx={{ backgroundColor: '#0D0E11', overflow: 'hidden', scrollMarginTop: { xs: 72, md: 96 } }}>
+    <Box id="about" sx={{ backgroundColor: '#0D0E11', borderTop: '1px solid rgba(201,168,76,0.08)', overflow: 'hidden', scrollMarginTop: { xs: 72, md: 96 } }}>
       <Box
         ref={ref}
         sx={{
@@ -70,35 +71,22 @@ export default function About() {
             flexDirection: 'column',
             justifyContent: 'center',
             px: { xs: 4, sm: 6, md: 8, lg: 10 },
-            py: { xs: 8, lg: 12 },
+            py: { xs: 10, lg: 14 },
           }}
         >
-          <Typography
-            sx={{
-              ...revealSx(visible, 120),
-              color: 'primary.main',
-              fontSize: '0.78rem',
-              letterSpacing: '0.35em',
-              mb: 3,
-              fontFamily: '"Inter", sans-serif',
-            }}
-          >
-            {t.about.label}
-          </Typography>
-
-          <Typography
-            variant="h2"
-            sx={{
-              ...revealSx(visible, 220),
-              fontSize: { xs: '2rem', md: '2.6rem' },
-              lineHeight: 1.2,
-              mb: 3,
-              color: '#EBEBEB',
-            }}
-          >
-            {t.about.headingLine1}<br />
-            <Box component="span" sx={{ color: 'primary.main' }}>{t.about.headingHighlighted}</Box>
-          </Typography>
+          <SectionHeading
+            align="left"
+            label={t.about.label}
+            heading={
+              <>
+                {t.about.headingLine1}<br />
+                <Box component="span" sx={{ color: 'primary.main' }}>{t.about.headingHighlighted}</Box>
+              </>
+            }
+            visible={visible}
+            delay={120}
+            sx={{ mb: 4 }}
+          />
 
           <Typography
             variant="body1"

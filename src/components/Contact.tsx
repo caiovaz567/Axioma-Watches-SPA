@@ -8,6 +8,7 @@ import SendIcon from '@mui/icons-material/Send';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import CheckIcon from '@mui/icons-material/Check';
 import emailjs from '@emailjs/browser';
+import SectionHeading from './SectionHeading';
 import { useScrollReveal, revealSx } from '../hooks/useScrollReveal';
 import { useLanguage } from '../contexts/LanguageContext';
 import contactBg from '../assets/contact-bg.jpg';
@@ -83,7 +84,7 @@ export default function Contact() {
   const handleCopy = (label: string, value: string, e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    navigator.clipboard.writeText(value);
+    navigator.clipboard?.writeText(value).catch(() => {});
     setCopiedLabel(label);
     setTimeout(() => setCopiedLabel(null), 2000);
   };
@@ -146,14 +147,18 @@ export default function Contact() {
             borderRadius: 1,
           }}
         >
-          <Typography sx={{ ...revealSx(visible, 0), color: 'primary.main', fontSize: '0.78rem', letterSpacing: '0.35em', mb: 3, fontFamily: '"Inter", sans-serif' }}>
-            {t.contact.label}
-          </Typography>
-
-          <Typography variant="h2" sx={{ ...revealSx(visible, 100), fontSize: { xs: '2rem', md: '2.6rem' }, color: '#EBEBEB', mb: 2, lineHeight: 1.2 }}>
-            {t.contact.headingLine1}<br />
-            <Box component="span" sx={{ color: 'primary.main' }}>{t.contact.headingHighlighted}</Box>
-          </Typography>
+          <SectionHeading
+            align="left"
+            label={t.contact.label}
+            heading={
+              <>
+                {t.contact.headingLine1}<br />
+                <Box component="span" sx={{ color: 'primary.main' }}>{t.contact.headingHighlighted}</Box>
+              </>
+            }
+            visible={visible}
+            sx={{ mb: 3 }}
+          />
 
           <Typography variant="body2" sx={{ ...revealSx(visible, 200), color: 'text.secondary', mb: 5, lineHeight: 1.8, maxWidth: 380 }}>
             {t.contact.body}
@@ -309,7 +314,16 @@ export default function Contact() {
                         className="copy-btn"
                         onClick={(e) => handleCopy(s.label, s.handle, e)}
                         size="small"
-                        sx={{ opacity: 0, transition: 'opacity 0.2s', color: copiedLabel === s.label ? 'success.main' : 'text.secondary', flexShrink: 0, '&:hover': { color: s.color, backgroundColor: s.color + '15' } }}
+                        sx={{
+                          // Em touch não existe hover: o botão precisa ficar sempre
+                          // visível, senão vira um alvo invisível que rouba o toque no link.
+                          opacity: { xs: 0.6, md: 0 },
+                          '@media (hover: none)': { opacity: 0.6 },
+                          transition: 'opacity 0.2s',
+                          color: copiedLabel === s.label ? 'success.main' : 'text.secondary',
+                          flexShrink: 0,
+                          '&:hover': { color: s.color, backgroundColor: s.color + '15' },
+                        }}
                       >
                         {copiedLabel === s.label ? <CheckIcon sx={{ fontSize: '1rem' }} /> : <ContentCopyIcon sx={{ fontSize: '1rem' }} />}
                       </IconButton>
