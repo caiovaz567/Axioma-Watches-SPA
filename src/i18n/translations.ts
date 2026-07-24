@@ -87,8 +87,16 @@ export interface Translations {
   footer: {
     by: string;
     tagline: string;
+    rights: string;
   };
   backToTop: string;
+  a11y: {
+    home: string;
+    carouselPrev: string;
+    carouselNext: string;
+    /** Prefixo do rótulo do botão de cupom — o código concatena o cupom */
+    copyCoupon: string;
+  };
 }
 
 const translations: Record<Lang, Translations> = { pt: pt_BR, en };

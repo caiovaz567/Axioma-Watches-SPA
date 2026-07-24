@@ -101,8 +101,15 @@ const en: Translations = {
   footer: {
     by: 'By Claudio Vaz',
     tagline: 'A space dedicated to fine watchmaking, always.',
+    rights: 'All rights reserved.',
   },
   backToTop: 'Back to top',
+  a11y: {
+    home: 'Back to top',
+    carouselPrev: 'Previous',
+    carouselNext: 'Next',
+    copyCoupon: 'Copy coupon',
+  },
 };
 
 export default en;
