@@ -7,6 +7,8 @@ const pt_BR: Translations = {
     partnerships: 'Parcerias',
     recommendations: 'Recomendações',
     contact: 'Contato',
+    menu: 'Menu',
+    close: 'Fechar',
   },
   hero: {
     kicker: 'O universo da relojoaria',
@@ -19,7 +21,7 @@ const pt_BR: Translations = {
     label: 'SOBRE O CANAL',
     headingLine1: 'O Universo',
     headingHighlighted: 'Axioma Watches',
-    body: 'Criado por Claudio Vaz, o Axioma Watches é um canal voltado para o universo da relojoaria — onde relojoaria não é apenas sobre relógios, é criar histórias, amizades e conexões.',
+    body: 'Criado por Claudio Vaz, o Axioma Watches é um canal voltado para o universo da relojoaria, onde relojoaria não é apenas sobre relógios, é criar histórias, amizades e conexões.',
     imgAlt: 'Relógio de pulso ao pôr do sol',
     pillars: [
       {
@@ -35,22 +37,25 @@ const pt_BR: Translations = {
   videos: {
     label: 'ÚLTIMOS VÍDEOS',
     heading: 'Confira os últimos conteúdos do canal',
-    subtitle: 'Novos vídeos toda semana — reviews, análises e muito mais sobre o universo da relojoaria.',
+    subtitle: 'Novos vídeos toda semana: reviews, análises e muito mais sobre o universo da relojoaria.',
   },
   recommendations: {
     label: 'RECOMENDAÇÕES',
     heading: 'Relógios recomendados',
-    subtitle: 'Uma curadoria pessoal de relógios que valem cada centavo — testados, aprovados e indicados com transparência junto aos nossos parceiros.',
+    subtitle: 'Uma curadoria pessoal de relógios que valem cada centavo. Testados, aprovados e indicados com transparência junto aos nossos parceiros.',
     filterAll: 'Todos',
     loadError: 'Não foi possível carregar as recomendações agora. Tente novamente em instantes.',
     badge: 'RECOMENDADO',
-    visitStore: 'VER NA LOJA',
+    visitStore: 'Ver na loja',
     couponLabel: 'CUPOM',
     copied: 'COPIADO!',
     tooltipCopy: 'Toque para copiar o cupom',
     tooltipCopied: 'Cupom copiado!',
   },
   promo: {
+    label: 'PARA MARCAS',
+    heading: 'Sua marca no Axioma',
+    subtitle: 'Duas frentes para apresentar produtos a quem realmente entende de relógio.',
     instagram: {
       title: 'Divulgação e Parceria',
       description: 'Alcance um público apaixonado pela boa relojoaria. O canal realiza divulgações no Instagram para marcas, lojas e lançamentos relacionados ao segmento com taxa negociável conforme o projeto.',
@@ -66,11 +71,11 @@ const pt_BR: Translations = {
     label: 'PARCERIAS',
     headingPart1: 'Trabalhos',
     headingPart2: 'Realizados',
-    subtitle: 'Parcerias com marcas do segmento — use o cupom exclusivo para aproveitar condições especiais.',
+    subtitle: 'Parcerias com marcas do segmento. Use o cupom exclusivo para aproveitar condições especiais.',
     couponLabel: 'CUPOM',
     copied: 'COPIADO!',
     watchVideo: 'ASSISTIR AO VÍDEO',
-    visitSite: 'VER SITE',
+    visitSite: 'Ver site',
     tooltipCopy: 'Toque para copiar o cupom',
     tooltipCopied: 'Cupom copiado!',
   },
@@ -99,6 +104,7 @@ const pt_BR: Translations = {
     },
   },
   footer: {
+    followTitle: 'Acompanhe',
     by: 'Por Claudio Vaz',
     tagline: 'Espaço voltado para a boa relojoaria sempre.',
     rights: 'Todos os direitos reservados.',

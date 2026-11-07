@@ -69,7 +69,8 @@ export default defineConfig(({ mode }) => {
       rollupOptions: {
         output: {
           manualChunks: {
-            'mui-vendor': ['@mui/material', '@mui/icons-material', '@emotion/react', '@emotion/styled'],
+            'mui-vendor': ['@mui/material', '@emotion/react', '@emotion/styled'],
+            'motion-vendor': ['motion', 'embla-carousel-react', 'embla-carousel-autoplay', 'lenis'],
           },
         },
       },

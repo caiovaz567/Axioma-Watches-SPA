@@ -1,16 +1,21 @@
-import { useState, useEffect, useRef } from 'react';
-import { AppBar, Toolbar, Box, Typography, IconButton, Drawer, List, ListItemButton, ButtonBase } from '@mui/material';
-import MenuIcon from '@mui/icons-material/Menu';
-import CloseIcon from '@mui/icons-material/Close';
-import axiomaLogo from '../assets/axioma-logo-128.png';
+import { useEffect, useRef, useState } from 'react';
+import { Box, ButtonBase } from '@mui/material';
+import { AnimatePresence, motion, useMotionValueEvent, useScroll } from 'motion/react';
 import { useLanguage } from '../contexts/LanguageContext';
 import type { Lang } from '../i18n/translations';
+import { tokens, font, display, ease, easeCss, gutter, maxWidth } from '../theme';
+import { scrollToTarget, setScrollLocked } from '../lib/scroll';
+import Icon from './ui/Icon';
 
 const NAV_IDS = ['#about', '#videos', '#parcerias', '#recomendacoes', '#contact'] as const;
 
-function LangToggle({ lang, setLang }: { lang: Lang; setLang: (l: Lang) => void }) {
+function LangToggle({ lang, setLang, id }: { lang: Lang; setLang: (l: Lang) => void; id: string }) {
   return (
-    <Box sx={{ display: 'flex', gap: 0.5, userSelect: 'none' }}>
+    <Box
+      role="group"
+      aria-label="Idioma / Language"
+      sx={{ display: 'flex', p: '3px', borderRadius: 999, backgroundColor: 'rgba(255,255,255,0.08)' }}
+    >
       {(['pt', 'en'] as const).map((l) => (
         <ButtonBase
           key={l}
@@ -18,36 +23,25 @@ function LangToggle({ lang, setLang }: { lang: Lang; setLang: (l: Lang) => void 
           aria-label={l === 'pt' ? 'Português' : 'English'}
           aria-pressed={lang === l}
           sx={{
-            px: 1.5,
-            py: 0.4,
-            borderRadius: '4px',
-            border: '1px solid',
-            borderColor: lang === l ? 'primary.main' : 'rgba(201,168,76,0.2)',
-            backgroundColor: lang === l ? 'rgba(201,168,76,0.1)' : 'transparent',
-            cursor: 'pointer',
-            transition: 'all 0.2s',
-            minWidth: 40,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            '&:hover': {
-              borderColor: 'primary.main',
-              backgroundColor: 'rgba(201,168,76,0.06)',
-            },
+            position: 'relative',
+            minWidth: 42,
+            height: 34,
+            borderRadius: 999,
+            fontFamily: font,
+            fontWeight: 600,
+            fontSize: '0.78rem',
+            color: lang === l ? tokens.ink : tokens.muted,
+            transition: 'color .3s',
           }}
         >
-          <Typography
-            sx={{
-              fontFamily: '"Inter", sans-serif',
-              fontSize: '0.7rem',
-              letterSpacing: '0.12em',
-              fontWeight: 600,
-              color: lang === l ? 'primary.main' : 'rgba(200,200,200,0.4)',
-              transition: 'color 0.2s',
-            }}
-          >
-            {l.toUpperCase()}
-          </Typography>
+          {lang === l && (
+            <motion.span
+              layoutId={`lang-pill-${id}`}
+              transition={{ duration: 0.45, ease }}
+              style={{ position: 'absolute', inset: 0, borderRadius: 999, background: tokens.white }}
+            />
+          )}
+          <span style={{ position: 'relative' }}>{l.toUpperCase()}</span>
         </ButtonBase>
       ))}
     </Box>
@@ -56,18 +50,42 @@ function LangToggle({ lang, setLang }: { lang: Lang; setLang: (l: Lang) => void 
 
 export default function Header() {
   const { t, lang, setLang } = useLanguage();
-  const [drawerOpen, setDrawerOpen] = useState(false);
-  const [activeSection, setActiveSection] = useState<string>('');
+  const [open, setOpen] = useState(false);
+  const [active, setActive] = useState('');
   const [scrolled, setScrolled] = useState(false);
-  const isScrolling = useRef(false);
-  const scrollTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [hidden, setHidden] = useState(false);
+  const clickLock = useRef(false);
+  // Trocar o idioma muda a altura dos textos; o navegador corrige a rolagem
+  // sozinho e isso parecia "rolar para baixo", escondendo o menu. Logo após a
+  // troca, essas mudanças de rolagem são ignoradas.
+  const langChangedAt = useRef(0);
+  // Ao clicar num item do menu, ele some e não volta durante a rolagem até a
+  // seção — senão cobriria o topo dela bem na hora do destaque dourado
+  const navHideUntil = useRef(0);
+  const changeLang = (l: Lang) => {
+    langChangedAt.current = Date.now();
+    setHidden(false);
+    setLang(l);
+  };
+  const { scrollY } = useScroll();
 
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 24);
-    onScroll();
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
-  }, []);
+  // Esconde ao descer e volta ao subir
+  useMotionValueEvent(scrollY, 'change', (y) => {
+    const prev = scrollY.getPrevious() ?? 0;
+    setScrolled(y > 24);
+    if (open) return;
+    if (Date.now() < navHideUntil.current) {
+      setHidden(true);
+      return;
+    }
+    if (Date.now() - langChangedAt.current < 1200) {
+      setHidden(false);
+      return;
+    }
+    if (y < 480) setHidden(false);
+    else if (y > prev + 2) setHidden(true);
+    else if (y < prev - 2) setHidden(false);
+  });
 
   const navLinks = [
     { label: t.nav.about, id: '#about' },
@@ -79,207 +97,274 @@ export default function Header() {
 
   useEffect(() => {
     const observers: IntersectionObserver[] = [];
-
-    NAV_IDS.forEach((id) => {
-      const el = document.querySelector(id);
-      if (!el) return;
-
-      const observer = new IntersectionObserver(
-        ([entry]) => {
-          if (entry.isIntersecting && !isScrolling.current) setActiveSection(id);
-        },
-        { rootMargin: '-40% 0px -55% 0px', threshold: 0 }
-      );
-
-      observer.observe(el);
-      observers.push(observer);
-    });
-
-    return () => observers.forEach((o) => o.disconnect());
+    // As seções são lazy: espera um pouco para elas existirem no DOM
+    const timer = window.setTimeout(() => {
+      NAV_IDS.forEach((id) => {
+        const el = document.querySelector(id);
+        if (!el) return;
+        const io = new IntersectionObserver(
+          ([entry]) => {
+            if (entry.isIntersecting && !clickLock.current) setActive(id);
+          },
+          { rootMargin: '-45% 0px -50% 0px' },
+        );
+        io.observe(el);
+        observers.push(io);
+      });
+    }, 600);
+    return () => {
+      window.clearTimeout(timer);
+      observers.forEach((o) => o.disconnect());
+    };
   }, []);
 
-  const scrollTo = (id: string) => {
-    setActiveSection(id);
-    setDrawerOpen(false);
-    isScrolling.current = true;
-    if (scrollTimer.current) clearTimeout(scrollTimer.current);
+  useEffect(() => {
+    setScrollLocked(open);
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && setOpen(false);
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [open]);
 
-    setTimeout(() => {
-      const el = document.querySelector(id);
-      if (!el) return;
-      const headerHeight = window.innerWidth < 600 ? 56 : 64;
-      const top = el.getBoundingClientRect().top + window.scrollY - headerHeight;
-      window.scrollTo({ top, behavior: 'smooth' });
-
-      setTimeout(() => {
-        const prev = document.querySelector('.section-highlight-overlay');
-        if (prev) prev.remove();
-        if (getComputedStyle(el).position === 'static') {
-          (el as HTMLElement).style.position = 'relative';
-        }
-        const overlay = document.createElement('div');
-        overlay.className = 'section-highlight-overlay';
-        el.appendChild(overlay);
-        setTimeout(() => overlay.remove(), 2300);
-      }, 700);
-    }, 300);
-
-    scrollTimer.current = setTimeout(() => {
-      isScrolling.current = false;
-    }, 1200);
+  const go = (id: string) => {
+    setActive(id);
+    clickLock.current = true;
+    window.setTimeout(() => (clickLock.current = false), 1600);
+    if (id !== '#hero') {
+      navHideUntil.current = Date.now() + 2200;
+      setHidden(true);
+    }
+    if (open) {
+      setOpen(false);
+      window.setTimeout(() => scrollToTarget(id), 300);
+    } else {
+      scrollToTarget(id);
+    }
   };
+
+  const solid = scrolled || open;
 
   return (
     <>
-      <AppBar
-        position="fixed"
-        elevation={0}
-        sx={{
-          backgroundColor: scrolled ? 'rgba(13,14,17,0.92)' : 'transparent',
-          backdropFilter: scrolled ? 'blur(12px)' : 'none',
-          borderBottom: '1px solid',
-          borderBottomColor: scrolled ? 'rgba(201,168,76,0.18)' : 'transparent',
-          boxShadow: scrolled ? '0 12px 40px rgba(0,0,0,0.45)' : 'none',
-          transition: 'background-color 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease, backdrop-filter 0.35s ease',
-        }}
+      <motion.header
+        initial={{ y: -24, opacity: 0 }}
+        animate={{ y: hidden ? '-100%' : 0, opacity: 1 }}
+        transition={{ duration: 0.6, ease }}
+        style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 1200 }}
       >
-        <Toolbar sx={{ justifyContent: 'space-between', px: { xs: 2, md: 6 }, minHeight: { xs: 56, sm: 64 } }}>
-
-          <ButtonBase
-            onClick={() => scrollTo('#hero')}
-            aria-label={t.a11y.home}
-            sx={{ display: 'flex', alignItems: 'center', gap: 1.5, cursor: 'pointer', userSelect: 'none' }}
+        <Box
+          sx={{
+            backgroundColor: solid ? 'rgba(13,14,17,0.78)' : 'transparent',
+            backdropFilter: solid ? 'blur(16px)' : 'none',
+            WebkitBackdropFilter: solid ? 'blur(16px)' : 'none',
+            borderBottom: '1px solid',
+            borderColor: solid ? tokens.hair : 'transparent',
+            transition: `background-color .5s ${easeCss}, border-color .5s ${easeCss}`,
+          }}
+        >
+          <Box
+            sx={{
+              maxWidth,
+              mx: 'auto',
+              px: gutter,
+              height: { xs: 64, md: 76 },
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: 3,
+            }}
           >
-            <Box
-              component="img"
-              src={axiomaLogo}
-              alt="Axioma Watches"
+            <ButtonBase
+              onClick={() => go('#hero')}
+              aria-label={t.a11y.home}
               sx={{
-                width: 42,
-                height: 42,
-                borderRadius: '50%',
-                objectFit: 'cover',
-                objectPosition: 'center 20%',
-                flexShrink: 0,
-                border: '1px solid rgba(201,168,76,0.4)',
-                display: 'block',
-              }}
-            />
-            <Typography
-              sx={{
-                display: { xs: 'none', sm: 'block' },
-                fontFamily: '"Inter", sans-serif',
-                fontSize: '0.85rem',
-                letterSpacing: '0.12em',
-                color: '#C8C8C8',
-                fontWeight: 600,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 0,
+                minHeight: 44,
+                borderRadius: 999,
+                // Clicar/segurar não seleciona nem arrasta a logo
+                userSelect: 'none',
+                WebkitUserSelect: 'none',
+                WebkitTouchCallout: 'none',
+                transition: `opacity .35s ${easeCss}`,
+                // Hover discreto: o logo inteiro só fica um pouco mais apagado
+                '@media (hover: hover)': { '&:hover': { opacity: 0.75 } },
+                '&:active': { opacity: 0.6 },
               }}
             >
-              AXIOMA WATCHES
-            </Typography>
-          </ButtonBase>
+              <Box
+                component="img"
+                className="logo-img"
+                src="/brand/mark-gold.svg"
+                alt=""
+                draggable={false}
+                sx={{ width: 34, height: 34, display: 'block' }}
+              />
+            </ButtonBase>
 
-          <Box sx={{ display: { xs: 'none', md: 'flex' }, alignItems: 'center', gap: 4 }}>
-            {navLinks.map((link) => {
-              const isActive = activeSection === link.id;
-              return (
-                <ButtonBase key={link.id} onClick={() => scrollTo(link.id)} sx={{ position: 'relative', cursor: 'pointer', userSelect: 'none', pb: 0.5 }}>
-                  <Typography
+            {/* Navegação desktop: a pílula clara desliza até o item ativo */}
+            <Box component="nav" sx={{ display: { xs: 'none', md: 'flex' }, alignItems: 'center', gap: 0.5 }}>
+              {navLinks.map((link) => {
+                const isActive = active === link.id;
+                return (
+                  <ButtonBase
+                    key={link.id}
+                    onClick={() => go(link.id)}
+                    aria-current={isActive ? 'true' : undefined}
                     sx={{
-                      fontFamily: '"Inter", sans-serif',
-                      fontSize: '0.72rem',
-                      letterSpacing: '0.18em',
-                      color: isActive ? 'primary.main' : 'rgba(200,200,200,0.7)',
-                      transition: 'color 0.2s',
-                      '&:hover': { color: 'primary.main' },
+                      position: 'relative',
+                      height: 40,
+                      px: { md: 1.5, lg: 2 },
+                      borderRadius: 999,
+                      fontFamily: font,
+                      fontSize: '0.95rem',
+                      fontWeight: 500,
+                      color: isActive ? tokens.white : 'rgba(232,232,232,0.7)',
+                      transition: 'color .3s',
+                      '&:hover': { color: tokens.white },
                     }}
                   >
-                    {link.label.toUpperCase()}
-                  </Typography>
-                  <Box
-                    sx={{
-                      position: 'absolute',
-                      bottom: 0,
-                      left: 0,
-                      right: 0,
-                      height: '1px',
-                      backgroundColor: 'primary.main',
-                      transform: isActive ? 'scaleX(1)' : 'scaleX(0)',
-                      transition: 'transform 0.3s ease',
-                      transformOrigin: 'center',
-                    }}
-                  />
-                </ButtonBase>
-              );
-            })}
-            <LangToggle lang={lang} setLang={setLang} />
-          </Box>
+                    {isActive && (
+                      <motion.span
+                        layoutId="nav-pill"
+                        transition={{ duration: 0.5, ease }}
+                        style={{ position: 'absolute', inset: 0, borderRadius: 999, background: 'rgba(255,255,255,0.1)' }}
+                      />
+                    )}
+                    <span style={{ position: 'relative' }}>{link.label}</span>
+                  </ButtonBase>
+                );
+              })}
+              <Box sx={{ ml: 1.5 }}>
+                <LangToggle lang={lang} setLang={changeLang} id="desk" />
+              </Box>
+            </Box>
 
-          <Box sx={{ display: { xs: 'flex', md: 'none' }, alignItems: 'center', gap: 1.5 }}>
-            <LangToggle lang={lang} setLang={setLang} />
-            <IconButton
-              onClick={() => setDrawerOpen(true)}
-              sx={{ color: 'rgba(201,168,76,0.8)', p: 0.75 }}
+            {/* Botão do menu mobile: duas linhas que viram um X */}
+            <ButtonBase
+              onClick={() => setOpen((o) => !o)}
+              aria-expanded={open}
+              aria-controls="mobile-menu"
+              aria-label={open ? t.nav.close : t.nav.menu}
+              sx={{
+                display: { xs: 'grid', md: 'none' },
+                placeItems: 'center',
+                width: 46,
+                height: 46,
+                borderRadius: '50%',
+                backgroundColor: 'rgba(255,255,255,0.1)',
+                color: tokens.white,
+              }}
             >
-              <MenuIcon />
-            </IconButton>
+              <Box sx={{ position: 'relative', width: 18, height: 10 }}>
+                {[0, 1].map((n) => (
+                  <motion.span
+                    key={n}
+                    animate={open ? { top: 4.5, rotate: n ? -45 : 45 } : { top: n ? 9 : 0, rotate: 0 }}
+                    transition={{ duration: 0.4, ease }}
+                    style={{ position: 'absolute', left: 0, right: 0, height: 1.5, borderRadius: 2, background: 'currentColor' }}
+                  />
+                ))}
+              </Box>
+            </ButtonBase>
           </Box>
-
-        </Toolbar>
-      </AppBar>
-
-      <Drawer
-        anchor="right"
-        open={drawerOpen}
-        onClose={() => setDrawerOpen(false)}
-        slotProps={{
-          paper: {
-            sx: {
-              width: 240,
-              backgroundColor: '#0D0E11',
-              borderLeft: '1px solid rgba(201,168,76,0.12)',
-            },
-          },
-        }}
-      >
-        <Box sx={{ display: 'flex', justifyContent: 'flex-end', p: 1.5, borderBottom: '1px solid rgba(201,168,76,0.08)' }}>
-          <IconButton onClick={() => setDrawerOpen(false)} sx={{ color: 'rgba(201,168,76,0.6)', '&:hover': { color: 'primary.main', backgroundColor: 'rgba(201,168,76,0.06)' } }}>
-            <CloseIcon />
-          </IconButton>
         </Box>
+      </motion.header>
 
-        <List disablePadding sx={{ pt: 1 }}>
-          {navLinks.map((link) => {
-            const isActive = activeSection === link.id;
-            return (
-              <ListItemButton
-                key={link.id}
-                onClick={() => scrollTo(link.id)}
+      {/* Menu mobile: painel que desce do topo */}
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            id="mobile-menu"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0, transition: { duration: 0.3, delay: 0.1 } }}
+            transition={{ duration: 0.3 }}
+            style={{
+              position: 'fixed',
+              inset: 0,
+              zIndex: 1150,
+              background: 'rgba(8,9,11,0.96)',
+              backdropFilter: 'blur(20px)',
+              display: 'flex',
+              flexDirection: 'column',
+              overflowY: 'auto',
+            }}
+          >
+            <Box component="nav" sx={{ px: gutter, pt: '96px', flex: 1 }}>
+              {navLinks.map((link, i) => (
+                <motion.div
+                  key={link.id}
+                  initial={{ opacity: 0, y: 24 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10, transition: { duration: 0.2 } }}
+                  transition={{ duration: 0.6, ease, delay: 0.05 + i * 0.05 }}
+                >
+                  <ButtonBase
+                    onClick={() => go(link.id)}
+                    sx={{
+                      width: '100%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      gap: 2,
+                      py: 2.25,
+                      borderBottom: `1px solid ${tokens.hair}`,
+                      color: active === link.id ? tokens.gold : tokens.white,
+                    }}
+                  >
+                    {/* Tamanho que cabe "Recomendações" até em telas de 320px */}
+                    <Box component="span" sx={{ ...display, fontSize: 'clamp(1.6rem, 7.5vw, 2rem)', lineHeight: 1.1, minWidth: 0, textAlign: 'left' }}>
+                      {link.label}
+                    </Box>
+                    <Icon name="arrowRight" size={20} style={{ opacity: 0.5, flexShrink: 0 }} />
+                  </ButtonBase>
+                </motion.div>
+              ))}
+            </Box>
+
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, transition: { duration: 0.15 } }}
+              transition={{ delay: 0.35, duration: 0.5, ease }}
+            >
+              <Box
                 sx={{
-                  py: 2,
-                  px: 3,
-                  borderLeft: isActive ? '2px solid' : '2px solid transparent',
-                  borderColor: isActive ? 'primary.main' : 'transparent',
-                  transition: 'border-color 0.3s, background-color 0.2s',
-                  '&:hover': { backgroundColor: 'rgba(201,168,76,0.05)' },
+                  px: gutter,
+                  pt: 3,
+                  pb: 'max(28px, env(safe-area-inset-bottom))',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  gap: 2,
                 }}
               >
-                <Typography
-                  sx={{
-                    fontFamily: '"Inter", sans-serif',
-                    fontSize: '0.75rem',
-                    letterSpacing: '0.2em',
-                    color: isActive ? 'primary.main' : 'rgba(200,200,200,0.75)',
-                    transition: 'color 0.2s',
-                  }}
-                >
-                  {link.label.toUpperCase()}
-                </Typography>
-              </ListItemButton>
-            );
-          })}
-        </List>
-      </Drawer>
+                <LangToggle lang={lang} setLang={changeLang} id="mob" />
+                <Box sx={{ display: 'flex', gap: 1 }}>
+                  {[
+                    { icon: 'youtube' as const, href: 'https://www.youtube.com/@axiomawatches', label: 'YouTube' },
+                    { icon: 'instagram' as const, href: 'https://www.instagram.com/axiomawatcheschannel', label: 'Instagram' },
+                  ].map((s) => (
+                    <ButtonBase
+                      key={s.label}
+                      component="a"
+                      href={s.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={s.label}
+                      sx={{ width: 48, height: 48, borderRadius: '50%', backgroundColor: 'rgba(255,255,255,0.08)', color: tokens.white }}
+                    >
+                      <Icon name={s.icon} size={20} />
+                    </ButtonBase>
+                  ))}
+                </Box>
+              </Box>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>
   );
 }
