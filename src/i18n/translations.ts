@@ -10,6 +10,8 @@ export interface Translations {
     partnerships: string;
     recommendations: string;
     contact: string;
+    menu: string;
+    close: string;
   };
   hero: {
     kicker: string;
@@ -45,6 +47,9 @@ export interface Translations {
     tooltipCopied: string;
   };
   promo: {
+    label: string;
+    heading: string;
+    subtitle: string;
     instagram: { title: string; description: string; button: string };
     youtube: { title: string; description: string; button: string };
   };
@@ -85,6 +90,7 @@ export interface Translations {
     };
   };
   footer: {
+    followTitle: string;
     by: string;
     tagline: string;
     rights: string;

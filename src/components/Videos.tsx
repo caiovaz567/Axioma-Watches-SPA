@@ -1,142 +1,145 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
+import { cssScrollFx } from '../lib/scroll';
 import { Box } from '@mui/material';
-import PlayArrowIcon from '@mui/icons-material/PlayArrow';
-import SectionHeading from './SectionHeading';
-import { useScrollReveal, revealSx } from '../hooks/useScrollReveal';
+import { motion, useScroll, useTransform } from 'motion/react';
+import { Section, Container, Heading } from './ui/Section';
+import Icon from './ui/Icon';
 import { useVideoConfig } from '../hooks/useVideoConfig';
 import { useLanguage } from '../contexts/LanguageContext';
+import { tokens, easeCss, eyebrow, gutter, maxWidth } from '../theme';
 
 export default function Videos() {
-  const { ref, visible } = useScrollReveal();
   const { videoId } = useVideoConfig();
   const { t } = useLanguage();
   const [playing, setPlaying] = useState(false);
+  const frameRef = useRef<HTMLDivElement>(null);
+
+  // O vídeo cresce de 86% até o tamanho total conforme chega ao meio da tela
+  const { scrollYProgress } = useScroll({ target: frameRef, offset: ['start end', 'center center'] });
+  const scale = useTransform(scrollYProgress, [0, 1], [0.86, 1]);
+
   // maxres é 16:9 e nítido, mas nem todo vídeo tem. Quando não tem, o YouTube
   // responde 404 com o placeholder cinza 120x90 no corpo — a imagem "carrega"
   // normalmente e onError nunca dispara. Por isso a checagem é pelo tamanho real.
   const [thumb, setThumb] = useState({ id: videoId, hiRes: true });
-  // Troca de vídeo reinicia a tentativa em alta resolução
   if (thumb.id !== videoId) setThumb({ id: videoId, hiRes: true });
   const setHiRes = (hiRes: boolean) => setThumb({ id: videoId, hiRes });
   const thumbUrl = `https://img.youtube.com/vi/${videoId}/${thumb.hiRes ? 'maxresdefault' : 'sddefault'}.jpg`;
 
   return (
-    <Box
-      id="videos"
-      sx={{
-        py: { xs: 10, md: 14 },
-        px: { xs: 4, sm: 6, md: 6 },
-        backgroundColor: '#0D0E11',
-        borderTop: '1px solid rgba(201,168,76,0.08)',
-        scrollMarginTop: { xs: 72, md: 96 },
-      }}
-    >
-      <Box ref={ref} sx={{ maxWidth: 1200, mx: 'auto', ...revealSx(visible) }}>
-        <SectionHeading
-          label={t.videos.label}
-          heading={t.videos.heading}
-          subtitle={t.videos.subtitle}
-          visible={visible}
-          sx={{ mb: { xs: 8, md: 10 } }}
-        />
-        <Box
-          sx={{
-            position: 'relative',
-            paddingTop: '56.25%',
-            borderRadius: 2,
-            overflow: 'hidden',
-            border: '1px solid rgba(201,168,76,0.15)',
-            boxShadow: '0 16px 48px rgba(0,0,0,0.5)',
-            cursor: playing ? 'default' : 'pointer',
-            backgroundColor: '#111',
-            // O overlay do play cobre a thumbnail inteira, então quem comanda os
-            // dois efeitos de hover é o container — senão a imagem nunca é hovered.
-            '@media (hover: hover)': {
-              '&:hover .video-thumb': { filter: 'brightness(0.55)' },
-              '&:hover .video-play': { transform: 'scale(1.1)', backgroundColor: 'rgba(201,168,76,1)' },
-            },
-            '&:focus-visible': {
-              outline: '2px solid',
-              outlineColor: 'primary.main',
-              outlineOffset: 3,
-            },
-          }}
-          onClick={() => !playing && setPlaying(true)}
-          onKeyDown={(e: React.KeyboardEvent) => {
-            if (!playing && (e.key === 'Enter' || e.key === ' ')) {
-              e.preventDefault();
-              setPlaying(true);
-            }
-          }}
-          role={playing ? undefined : 'button'}
-          tabIndex={playing ? undefined : 0}
-          aria-label={playing ? undefined : t.videos.heading}
+    <Section id="videos" sx={{ backgroundColor: tokens.inkDeep }}>
+      <Container>
+        <Heading label={t.videos.label} title={t.videos.heading} lead={t.videos.subtitle} align="center" />
+      </Container>
+
+      {/* Mais largo que o texto: no celular encosta nas bordas da tela */}
+      {/* Largura limitada pela altura da tela no computador: título + vídeo cabem numa tela */}
+      <Box
+        sx={{
+          maxWidth: { xs: maxWidth, md: `min(${maxWidth}px, calc((100svh - 500px) * 16 / 9 + 96px))` },
+          minWidth: { md: 'min(100%, 720px)' },
+          mx: 'auto',
+          px: { xs: 0, sm: gutter.sm, md: gutter.md, lg: gutter.lg },
+        }}
+      >
+        <motion.div
+          ref={frameRef}
+          className={cssScrollFx ? 'sd-video' : undefined}
+          style={{ willChange: 'transform', ...(cssScrollFx ? {} : { scale }) }}
         >
-          {playing ? (
-            <Box
-              component="iframe"
-              src={`https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0`}
-              title="Axioma Watches"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-              sx={{
-                position: 'absolute',
-                top: 0, left: 0,
-                width: '100%', height: '100%',
-                border: 'none',
-              }}
-            />
-          ) : (
-            <>
+          <Box
+            onClick={() => !playing && setPlaying(true)}
+            onKeyDown={(e: React.KeyboardEvent) => {
+              if (!playing && (e.key === 'Enter' || e.key === ' ')) {
+                e.preventDefault();
+                setPlaying(true);
+              }
+            }}
+            role={playing ? undefined : 'button'}
+            tabIndex={playing ? undefined : 0}
+            aria-label={playing ? undefined : t.videos.heading}
+            sx={{
+              position: 'relative',
+              aspectRatio: '16 / 9',
+              overflow: 'hidden',
+              borderRadius: { xs: 0, sm: '24px' },
+              backgroundColor: '#000',
+              cursor: playing ? 'default' : 'pointer',
+              '& .v-thumb': { transition: `transform 1.4s ${easeCss}` },
+              '& .v-play': { transition: `transform .6s ${easeCss}` },
+              '@media (hover: hover)': {
+                '&:hover .v-thumb': { transform: 'scale(1.04)' },
+                '&:hover .v-play': { transform: 'scale(1.1)' },
+              },
+            }}
+          >
+            {playing ? (
               <Box
-                component="img"
-                className="video-thumb"
-                src={thumbUrl}
-                onLoad={(e: React.SyntheticEvent<HTMLImageElement>) => {
-                  // 120px de largura = placeholder cinza do YouTube, não a capa real
-                  if (e.currentTarget.naturalWidth <= 121) setHiRes(false);
-                }}
-                onError={() => setHiRes(false)}
-                alt="Axioma Watches"
-                sx={{
-                  position: 'absolute',
-                  top: 0, left: 0,
-                  width: '100%', height: '100%',
-                  objectFit: 'cover',
-                  filter: 'brightness(0.75)',
-                  transition: 'filter 0.3s',
-                }}
+                component="iframe"
+                src={`https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0`}
+                title="Axioma Watches"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                sx={{ position: 'absolute', inset: 0, width: '100%', height: '100%', border: 0 }}
               />
-              <Box
-                sx={{
-                  position: 'absolute',
-                  inset: 0,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
+            ) : (
+              <>
                 <Box
-                  className="video-play"
+                  component="img"
+                  className="v-thumb"
+                  src={thumbUrl}
+                  loading="lazy"
+                  onLoad={(e: React.SyntheticEvent<HTMLImageElement>) => {
+                    // 120px de largura = placeholder cinza do YouTube, não a capa real
+                    if (e.currentTarget.naturalWidth <= 121) setHiRes(false);
+                  }}
+                  onError={() => setHiRes(false)}
+                  alt=""
+                  sx={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
+                />
+                <Box aria-hidden sx={{ position: 'absolute', inset: 0, background: `radial-gradient(circle at center, ${tokens.inkA(0.15)} 0%, ${tokens.inkA(0.45)} 100%)` }} />
+
+                <Box sx={{ position: 'absolute', inset: 0, display: 'grid', placeItems: 'center' }}>
+                  <Box
+                    className="v-play"
+                    sx={{
+                      width: { xs: 72, md: 112 },
+                      height: { xs: 72, md: 112 },
+                      borderRadius: '50%',
+                      backgroundColor: 'rgba(255,255,255,0.18)',
+                      backdropFilter: 'blur(14px)',
+                      border: '1px solid rgba(255,255,255,0.35)',
+                      display: 'grid',
+                      placeItems: 'center',
+                      color: tokens.white,
+                      pl: '4px',
+                    }}
+                  >
+                    <Icon name="play" size={30} />
+                  </Box>
+                </Box>
+
+                <Box
                   sx={{
-                    width: { xs: 64, md: 80 },
-                    height: { xs: 64, md: 80 },
-                    borderRadius: '50%',
-                    backgroundColor: 'rgba(201,168,76,0.92)',
+                    ...eyebrow,
+                    position: 'absolute',
+                    left: { xs: 16, md: 28 },
+                    bottom: { xs: 14, md: 24 },
                     display: 'flex',
                     alignItems: 'center',
-                    justifyContent: 'center',
-                    boxShadow: '0 4px 32px rgba(0,0,0,0.6)',
-                    transition: 'transform 0.2s, background-color 0.2s',
+                    gap: 1,
+                    color: tokens.white,
+                    fontSize: { xs: '0.68rem', md: '0.78rem' },
                   }}
                 >
-                  <PlayArrowIcon sx={{ color: '#0D0E11', fontSize: { xs: '2.2rem', md: '2.8rem' } }} />
+                  <Icon name="youtube" size={18} />
+                  @axiomawatches
                 </Box>
-              </Box>
-            </>
-          )}
-        </Box>
+              </>
+            )}
+          </Box>
+        </motion.div>
       </Box>
-    </Box>
+    </Section>
   );
 }

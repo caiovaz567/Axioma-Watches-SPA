@@ -1,156 +1,131 @@
-import { Box, Typography } from '@mui/material';
-import SectionHeading from './SectionHeading';
-import { useScrollReveal, revealSx } from '../hooks/useScrollReveal';
+import { Box } from '@mui/material';
+import { motion } from 'motion/react';
+import { Section, Container, Heading } from './ui/Section';
+import { Reveal } from './ui/motion';
 import { useLanguage } from '../contexts/LanguageContext';
+import { tokens, display, ease, radius } from '../theme';
 import aboutImg from '../assets/about.jpg';
 
+const VIEWPORT = { once: true, margin: '0px 0px -12% 0px' } as const;
+
 export default function About() {
-  const { ref, visible } = useScrollReveal();
   const { t } = useLanguage();
-  const { pillars } = t.about;
+  const [before, after] = t.about.body.split('Claudio Vaz');
 
   return (
-    <Box id="about" sx={{ backgroundColor: '#0D0E11', borderTop: '1px solid rgba(201,168,76,0.08)', overflow: 'hidden', scrollMarginTop: { xs: 72, md: 96 } }}>
-      <Box
-        ref={ref}
-        sx={{
-          display: 'grid',
-          gridTemplateColumns: { xs: '1fr', lg: '1fr 1fr' },
-          minHeight: { lg: '80vh' },
-        }}
-      >
-        <Box
-          sx={{
-            position: 'relative',
-            minHeight: { xs: 300, md: 420, lg: 'auto' },
-            overflow: 'hidden',
-          }}
-        >
-          <Box
-            component="img"
-            src={aboutImg}
-            loading="lazy"
-            alt={t.about.imgAlt}
-            sx={{
-              ...revealSx(visible, 0),
-              position: { xs: 'relative', lg: 'absolute' },
-              width: '100%',
-              height: { xs: 300, md: 420, lg: '100%' },
-              objectFit: 'cover',
-              objectPosition: 'center',
-              display: 'block',
-              filter: 'brightness(0.65) saturate(0.9)',
-            }}
-          />
-          <Box
-            sx={{
-              display: { xs: 'none', lg: 'block' },
-              position: 'absolute',
-              top: 0,
-              right: 0,
-              bottom: 0,
-              width: '40%',
-              background: 'linear-gradient(to right, transparent, #0D0E11)',
-            }}
-          />
-          <Box
-            sx={{
-              position: 'absolute',
-              bottom: 0,
-              left: 0,
-              right: 0,
-              height: { xs: '50%', lg: '30%' },
-              background: 'linear-gradient(to top, #0D0E11, transparent)',
-            }}
-          />
-        </Box>
+    <Section id="about">
+      <Container>
+        <Heading
+          label={t.about.label}
+          title={`${t.about.headingLine1} ${t.about.headingHighlighted}`}
+          highlight={t.about.headingHighlighted}
+        />
 
-        <Box
-          sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'center',
-            px: { xs: 4, sm: 6, md: 8, lg: 10 },
-            py: { xs: 10, lg: 14 },
-          }}
-        >
-          <SectionHeading
-            align="left"
-            label={t.about.label}
-            heading={
-              <>
-                {t.about.headingLine1}<br />
-                <Box component="span" sx={{ color: 'primary.main' }}>{t.about.headingHighlighted}</Box>
-              </>
-            }
-            visible={visible}
-            delay={120}
-            sx={{ mb: 4 }}
-          />
-
-          <Typography
-            variant="body1"
-            sx={{
-              ...revealSx(visible, 340),
-              color: 'text.secondary',
-              lineHeight: 1.9,
-              mb: 6,
-              maxWidth: 440,
-              fontSize: '0.97rem',
-            }}
+        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '7fr 5fr' }, gap: 2, alignItems: 'stretch' }}>
+          {/* Cartão com a foto de fundo escurecida e a frase do Claudio por cima.
+              A foto tem 900px: neste tamanho ela não é esticada e fica nítida. */}
+          <motion.div
+            initial={{ clipPath: 'inset(100% 0% 0% 0% round 24px)' }}
+            whileInView={{ clipPath: 'inset(0% 0% 0% 0% round 24px)' }}
+            viewport={VIEWPORT}
+            transition={{ duration: 1.3, ease }}
+            style={{ display: 'flex' }}
           >
-            {t.about.body.split('Claudio Vaz').map((part, i) =>
-              i === 0 ? part : (
-                <span key={i}>
-                  <Box component="span" sx={{ color: 'primary.main', fontWeight: 600 }}>Claudio Vaz</Box>
-                  {part}
-                </span>
-              )
-            )}
-          </Typography>
-
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-            {pillars.map((p, i) => (
-              <Box key={p.title} sx={{ ...revealSx(visible, 460 + i * 120), display: 'flex', gap: 3, alignItems: 'flex-start' }}>
-                <Typography
-                  sx={{
-                    color: 'primary.main',
-                    fontSize: '0.78rem',
-                    fontFamily: '"Inter", sans-serif',
-                    fontWeight: 500,
-                    letterSpacing: '0.1em',
-                    opacity: 0.5,
-                    mt: 0.4,
-                    minWidth: 24,
-                  }}
-                >
-                  {String(i + 1).padStart(2, '0')}
-                </Typography>
-                <Box sx={{ borderLeft: '1px solid rgba(201,168,76,0.2)', pl: 3 }}>
-                  <Typography
-                    variant="h6"
+            <Box
+              component="figure"
+              sx={{
+                m: 0,
+                position: 'relative',
+                flex: 1,
+                minHeight: { xs: 460, md: 560 },
+                overflow: 'hidden',
+                borderRadius: radius.media,
+                display: 'flex',
+                alignItems: 'flex-end',
+              }}
+            >
+              <motion.img
+                src={aboutImg}
+                alt={t.about.imgAlt}
+                loading="lazy"
+                initial={{ scale: 1.15 }}
+                whileInView={{ scale: 1 }}
+                viewport={VIEWPORT}
+                transition={{ duration: 1.8, ease }}
+                style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: '50% 30%', display: 'block' }}
+              />
+              {/* Escurece de baixo para cima: o texto fica legível, o relógio e o sol continuam visíveis */}
+              <Box
+                aria-hidden
+                sx={{
+                  position: 'absolute',
+                  inset: 0,
+                  background: `linear-gradient(180deg, ${tokens.inkA(0.1)} 0%, ${tokens.inkA(0.25)} 35%, ${tokens.inkA(0.88)} 72%, ${tokens.inkA(0.96)} 100%)`,
+                }}
+              />
+              <Box component="figcaption" sx={{ position: 'relative', p: { xs: 3, md: 5 } }}>
+                <Reveal delay={0.4}>
+                  <Box aria-hidden sx={{ ...display, fontSize: { xs: '4rem', md: '5.5rem' }, color: tokens.gold, lineHeight: 0.6, mb: { xs: 1.5, md: 2 } }}>
+                    “
+                  </Box>
+                  <Box
+                    component="p"
                     sx={{
-                      color: '#EBEBEB',
-                      fontSize: '0.95rem',
-                      fontWeight: 600,
-                      mb: 0.8,
-                      fontFamily: '"Inter", sans-serif',
+                      m: 0,
+                      fontWeight: 500,
+                      fontSize: { xs: '1.3rem', md: '1.75rem' },
+                      lineHeight: 1.32,
+                      letterSpacing: '-0.02em',
+                      color: tokens.white,
+                      maxWidth: 640,
                     }}
                   >
-                    {p.title}
-                  </Typography>
-                  <Typography
-                    variant="body2"
-                    sx={{ color: 'text.secondary', lineHeight: 1.8, fontSize: '0.87rem' }}
-                  >
-                    {p.description}
-                  </Typography>
-                </Box>
+                    {before}
+                    {after !== undefined && (
+                      <>
+                        <Box component="span" sx={{ color: tokens.gold }}>Claudio Vaz</Box>
+                        {after}
+                      </>
+                    )}
+                  </Box>
+                </Reveal>
               </Box>
+            </Box>
+          </motion.div>
+
+          {/* Os dois pilares dividem a altura do cartão da foto */}
+          <Box sx={{ display: 'grid', gridTemplateRows: { md: '1fr 1fr' }, gap: 2 }}>
+            {t.about.pillars.map((p, i) => (
+              <Reveal key={p.title} delay={0.15 + i * 0.1} style={{ display: 'flex' }}>
+                <Box
+                  sx={{
+                    flex: 1,
+                    p: { xs: 3, md: 4 },
+                    borderRadius: radius.media,
+                    backgroundColor: tokens.paper,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'space-between',
+                    gap: 3,
+                  }}
+                >
+                  <Box sx={{ ...display, fontSize: { xs: '2.6rem', md: '3.4rem' }, color: tokens.gold, lineHeight: 1 }}>
+                    {String(i + 1).padStart(2, '0')}
+                  </Box>
+                  <Box>
+                    <Box component="h3" sx={{ m: 0, mb: 1, fontWeight: 700, fontSize: { xs: '1.2rem', md: '1.35rem' }, color: tokens.white }}>
+                      {p.title}
+                    </Box>
+                    <Box component="p" sx={{ m: 0, color: tokens.muted, fontSize: '1rem', lineHeight: 1.6 }}>
+                      {p.description}
+                    </Box>
+                  </Box>
+                </Box>
+              </Reveal>
             ))}
           </Box>
         </Box>
-      </Box>
-    </Box>
+      </Container>
+    </Section>
   );
 }

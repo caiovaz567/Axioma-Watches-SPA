@@ -7,6 +7,8 @@ const en: Translations = {
     partnerships: 'Partnerships',
     recommendations: 'Recommendations',
     contact: 'Contact',
+    menu: 'Menu',
+    close: 'Close',
   },
   hero: {
     kicker: 'The world of watchmaking',
@@ -19,7 +21,7 @@ const en: Translations = {
     label: 'ABOUT THE CHANNEL',
     headingLine1: 'The',
     headingHighlighted: 'Axioma Watches Universe',
-    body: 'Created by Claudio Vaz, Axioma Watches is a channel dedicated to the world of watchmaking — where watches are not just timepieces, but stories, friendships, and connections.',
+    body: 'Created by Claudio Vaz, Axioma Watches is a channel dedicated to the world of watchmaking, where watches are not just timepieces, but stories, friendships, and connections.',
     imgAlt: 'Wristwatch at sunset',
     pillars: [
       {
@@ -35,22 +37,25 @@ const en: Translations = {
   videos: {
     label: 'LATEST VIDEOS',
     heading: 'Check out the latest content from the channel',
-    subtitle: 'New videos every week — reviews, analyses, and more about the world of watchmaking.',
+    subtitle: 'New videos every week: reviews, analyses, and more about the world of watchmaking.',
   },
   recommendations: {
     label: 'RECOMMENDATIONS',
     heading: 'Recommended Watches',
-    subtitle: 'A personal curation of watches that are worth every penny — tested, approved, and recommended with transparency alongside our partners.',
+    subtitle: 'A personal curation of watches that are worth every penny. Tested, approved, and recommended with transparency alongside our partners.',
     filterAll: 'All',
     loadError: 'We could not load the recommendations right now. Please try again in a moment.',
     badge: 'RECOMMENDED',
-    visitStore: 'VIEW IN STORE',
+    visitStore: 'View in store',
     couponLabel: 'COUPON',
     copied: 'COPIED!',
     tooltipCopy: 'Tap to copy coupon',
     tooltipCopied: 'Coupon copied!',
   },
   promo: {
+    label: 'FOR BRANDS',
+    heading: 'Your brand on Axioma',
+    subtitle: 'Two ways to put your product in front of people who actually know watches.',
     instagram: {
       title: 'Promotion and Partnership',
       description: 'Reach an audience passionate about fine watchmaking. The channel promotes brands, stores, and launches on Instagram with a negotiable fee based on the project.',
@@ -66,11 +71,11 @@ const en: Translations = {
     label: 'PARTNERSHIPS',
     headingPart1: 'Our',
     headingPart2: 'Partners',
-    subtitle: 'Partnerships with brands in the segment — use the exclusive coupon to enjoy special conditions.',
+    subtitle: 'Partnerships with brands in the segment. Use the exclusive coupon to enjoy special conditions.',
     couponLabel: 'COUPON',
     copied: 'COPIED!',
     watchVideo: 'WATCH THE VIDEO',
-    visitSite: 'VISIT SITE',
+    visitSite: 'Visit site',
     tooltipCopy: 'Tap to copy the coupon',
     tooltipCopied: 'Coupon copied!',
   },
@@ -99,6 +104,7 @@ const en: Translations = {
     },
   },
   footer: {
+    followTitle: 'Follow',
     by: 'By Claudio Vaz',
     tagline: 'A space dedicated to fine watchmaking, always.',
     rights: 'All rights reserved.',

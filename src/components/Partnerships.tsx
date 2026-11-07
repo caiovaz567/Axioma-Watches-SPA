@@ -1,15 +1,14 @@
-import { useState } from 'react';
-import { Box, Typography, Tooltip } from '@mui/material';
-import CheckIcon from '@mui/icons-material/Check';
-import ContentCopyIcon from '@mui/icons-material/ContentCopy';
-import OpenInNewIcon from '@mui/icons-material/OpenInNew';
-import Carousel from './Carousel';
-import SectionHeading from './SectionHeading';
+import { Box } from '@mui/material';
+import Carousel from './ui/Carousel';
+import CouponChip from './ui/CouponChip';
+import Icon from './ui/Icon';
+import { Section, Container, Heading } from './ui/Section';
+import { Reveal } from './ui/motion';
+import { useLanguage } from '../contexts/LanguageContext';
+import { tokens, display, easeCss, radius } from '../theme';
 import impalaImg from '../assets/banner-empresa-1170x305.jpg';
 import terranovaImg from '../assets/d86c3fa9-b022-4d13-91d7-b2246a746426_logo-azul-jpg.jpg';
 import roueImg from '../assets/roue_logo.svg';
-import { useScrollReveal, revealSx } from '../hooks/useScrollReveal';
-import { useLanguage } from '../contexts/LanguageContext';
 
 interface Partnership {
   name: string;
@@ -63,171 +62,105 @@ const PARTNERSHIPS: Partnership[] = [
   },
 ];
 
-function PartnershipCard({ p }: { p: Partnership }) {
-  const [copied, setCopied] = useState(false);
+function PartnerSlide({ p }: { p: Partnership }) {
   const { t, lang } = useLanguage();
   const description = lang === 'en' && p.descriptionEn ? p.descriptionEn : p.description;
   const thumbnail = p.imageUrl ?? (p.videoId ? `https://img.youtube.com/vi/${p.videoId}/maxresdefault.jpg` : '');
 
-  const handleCopy = () => {
-    if (!p.coupon) return;
-    const fallback = () => {
-      const ta = document.createElement('textarea');
-      ta.value = p.coupon;
-      ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0;pointer-events:none';
-      document.body.appendChild(ta);
-      ta.focus();
-      ta.select();
-      document.execCommand('copy');
-      document.body.removeChild(ta);
-    };
-    if (navigator.clipboard?.writeText) {
-      navigator.clipboard.writeText(p.coupon).catch(fallback);
-    } else {
-      fallback();
-    }
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2500);
-  };
-
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
-      {/* Arte do parceiro — apresentação apenas, sem ação */}
-      <Box
-        sx={{
-          position: 'relative',
-          aspectRatio: '16/9',
-          borderRadius: 2,
-          overflow: 'hidden',
-          backgroundColor: p.imageBg ?? '#000',
-          flexShrink: 0,
-        }}
-      >
-        {thumbnail && (
-          <Box
-            component="img"
-            src={thumbnail}
-            alt={p.name}
-            loading="lazy"
-            sx={{
-              position: 'absolute', inset: 0,
-              width: '100%', height: '100%',
-              objectFit: p.imageFit ?? 'cover',
-              objectPosition: 'center',
-              backgroundColor: p.imageBg ?? 'transparent',
-              ...(p.imageFit === 'contain' && { padding: '20px' }),
-            }}
-          />
-        )}
-        <Box sx={{ position: 'absolute', top: 0, left: 0, right: 0, height: '2px', background: 'linear-gradient(to right, transparent, rgba(201,168,76,0.8), transparent)' }} />
-      </Box>
-
-      {/* Content */}
-      <Box sx={{ mt: 2.5, display: 'flex', flexDirection: 'column', flex: 1, px: 0.5 }}>
-        <Typography
-          sx={{
-            fontFamily: '"Inter", sans-serif',
-            fontSize: '1.05rem',
-            fontWeight: 600,
-            color: '#EBEBEB',
-            mb: 1,
-          }}
-        >
-          {p.name}
-        </Typography>
-
-        {/* Altura rígida (6 linhas) para cupom e botões ficarem alinhados entre os cards */}
-        <Box sx={{ height: '9.2rem', overflow: 'hidden', mb: 2.5 }}>
-          {description && (
-            <Typography
-              variant="body2"
+    <Box
+      component="article"
+      sx={{
+        flex: 1,
+        display: 'grid',
+        gridTemplateColumns: { xs: '1fr', md: '5fr 6fr' },
+        borderRadius: radius.media,
+        overflow: 'hidden',
+        backgroundColor: tokens.paper,
+      }}
+    >
+      {/* Arte grande da marca; a camada interna anda em parallax ao arrastar */}
+      <Box sx={{ position: 'relative', overflow: 'hidden', aspectRatio: { xs: '4 / 3', md: 'auto' }, minHeight: { md: 380 }, backgroundColor: p.imageBg ?? '#000' }}>
+        <Box data-parallax sx={{ position: 'absolute', top: 0, bottom: 0, left: '-10%', width: '120%' }}>
+          {thumbnail && (
+            <Box
+              component="img"
+              src={thumbnail}
+              alt={p.name}
+              loading="lazy"
+              draggable={false}
               sx={{
-                color: 'text.secondary',
-                lineHeight: 1.75,
-                fontSize: '0.875rem',
-                display: '-webkit-box',
-                WebkitLineClamp: 6,
-                WebkitBoxOrient: 'vertical',
-                overflow: 'hidden',
+                width: '100%',
+                height: '100%',
+                objectFit: p.imageFit ?? 'cover',
+                p: p.imageFit === 'contain' ? { xs: '6% 12%', md: '10%' } : 0,
               }}
-            >
-              {description}
-            </Typography>
+            />
           )}
         </Box>
+      </Box>
 
-        {p.coupon && (
-          <Tooltip
-            title={copied ? t.partnerships.tooltipCopied : t.partnerships.tooltipCopy}
-            placement="top"
-          >
-            <Box
-              onClick={handleCopy}
-              onKeyDown={(e: React.KeyboardEvent) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault();
-                  handleCopy();
-                }
-              }}
-              role="button"
-              tabIndex={0}
-              aria-label={`${t.a11y.copyCoupon} ${p.coupon}`}
-              sx={{
-                display: 'inline-flex', alignItems: 'center', gap: 1,
-                px: 1.75, py: 1,
-                borderRadius: '6px', mb: 2.5, alignSelf: 'flex-start',
-                border: '1px solid',
-                borderColor: copied ? 'success.main' : 'rgba(201,168,76,0.4)',
-                backgroundColor: copied ? 'rgba(76,175,80,0.08)' : 'rgba(201,168,76,0.04)',
-                cursor: 'pointer', userSelect: 'none',
-                transition: 'border-color 0.2s, background-color 0.2s, transform 0.1s',
-                minHeight: 40,
-                '&:hover': {
-                  borderColor: copied ? 'success.main' : 'primary.main',
-                  backgroundColor: copied ? 'rgba(76,175,80,0.12)' : 'rgba(201,168,76,0.08)',
-                },
-                '&:active': { transform: 'scale(0.97)' },
-                '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.main', outlineOffset: 2 },
-              }}
-            >
-              {copied ? (
-                <>
-                  <CheckIcon sx={{ fontSize: '0.85rem', color: 'success.main' }} />
-                  <Typography sx={{ fontSize: '0.72rem', letterSpacing: '0.14em', color: 'success.main', fontFamily: '"Inter", sans-serif', fontWeight: 600 }}>
-                    {t.partnerships.copied}
-                  </Typography>
-                </>
-              ) : (
-                <>
-                  <Typography sx={{ fontSize: '0.62rem', letterSpacing: '0.18em', color: 'text.secondary', fontFamily: '"Inter", sans-serif', fontWeight: 500 }}>
-                    {t.partnerships.couponLabel}
-                  </Typography>
-                  <Typography sx={{ fontSize: '0.82rem', letterSpacing: '0.2em', color: 'primary.main', fontFamily: '"Inter", sans-serif', fontWeight: 700 }}>
-                    {p.coupon.toUpperCase()}
-                  </Typography>
-                  <ContentCopyIcon sx={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.3)' }} />
-                </>
-              )}
-            </Box>
-          </Tooltip>
-        )}
+      <Box sx={{ p: { xs: 3, md: 5 }, display: 'flex', flexDirection: 'column', flex: 1 }}>
+        <Box component="h3" sx={{ ...display, m: 0, fontSize: { xs: '2rem', md: '2.8rem' }, color: tokens.white }}>
+          {p.name}
+        </Box>
+        <Box
+          component="p"
+          sx={{
+            m: 0,
+            mt: 2,
+            mb: 4,
+            maxWidth: 760,
+            color: tokens.muted,
+            fontSize: { xs: '1rem', md: '1.08rem' },
+            lineHeight: 1.6,
+            display: '-webkit-box',
+            WebkitLineClamp: { xs: 5, md: 4 },
+            WebkitBoxOrient: 'vertical',
+            overflow: 'hidden',
+          }}
+        >
+          {description}
+        </Box>
 
-        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3, alignItems: 'center' }}>
+        <Box sx={{ mt: 'auto', display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 1.5 }}>
+          {p.coupon && (
+            <CouponChip
+              code={p.coupon.toUpperCase()}
+              label={t.partnerships.couponLabel}
+              copiedLabel={t.partnerships.copied}
+              tooltip={t.partnerships.tooltipCopy}
+              sx={{ minHeight: 46 }}
+            />
+          )}
           <Box
-            component="a" href={p.websiteUrl} target="_blank" rel="noopener noreferrer"
+            component="a"
+            href={p.websiteUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            draggable={false}
             sx={{
-              display: 'inline-flex', alignItems: 'center', gap: 0.75,
-              color: 'text.secondary', textDecoration: 'none',
-              fontSize: '0.7rem', letterSpacing: '0.15em',
-              fontFamily: '"Inter", sans-serif', fontWeight: 500,
-              borderBottom: '1px solid rgba(255,255,255,0.1)', pb: 0.5,
-              transition: 'color 0.2s, border-color 0.2s',
-              '&:hover': { color: '#EBEBEB', borderColor: 'rgba(255,255,255,0.3)' },
-              '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.main', outlineOffset: 4, borderRadius: '2px' },
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 1,
+              minHeight: 46,
+              px: 2.5,
+              borderRadius: 999,
+              backgroundColor: tokens.white,
+              color: tokens.ink,
+              textDecoration: 'none',
+              fontWeight: 600,
+              fontSize: '0.95rem',
+              transition: `background-color .3s`,
+              '& svg': { transition: `transform .45s ${easeCss}` },
+              '@media (hover: hover)': {
+                '&:hover': { backgroundColor: tokens.gold },
+                '&:hover svg': { transform: 'translate(2px,-2px)' },
+              },
             }}
           >
-            <OpenInNewIcon sx={{ fontSize: '0.85rem' }} />
             {t.partnerships.visitSite}
+            <Icon name="arrowUpRight" size={16} />
           </Box>
         </Box>
       </Box>
@@ -236,55 +169,25 @@ function PartnershipCard({ p }: { p: Partnership }) {
 }
 
 export default function Partnerships() {
-  const { ref, visible } = useScrollReveal();
   const { t } = useLanguage();
 
   return (
-    <Box
-      id="parcerias"
-      sx={{
-        backgroundColor: '#0D0E11',
-        borderTop: '1px solid rgba(201,168,76,0.08)',
-        py: { xs: 10, md: 14 },
-        scrollMarginTop: { xs: 72, md: 96 },
-      }}
-    >
-      <Box ref={ref} sx={{ maxWidth: 1600, mx: 'auto', px: { xs: 4, sm: 6, md: 6 } }}>
-
-        <SectionHeading
+    <Section id="parcerias">
+      <Container>
+        <Heading
           label={t.partnerships.label}
-          heading={
-            <>
-              {t.partnerships.headingPart1}{' '}
-              <Box component="span" sx={{ color: 'primary.main' }}>{t.partnerships.headingPart2}</Box>
-            </>
-          }
-          subtitle={t.partnerships.subtitle}
-          visible={visible}
-          sx={{ mb: { xs: 8, md: 10 } }}
+          title={`${t.partnerships.headingPart1} ${t.partnerships.headingPart2}`}
+          highlight={t.partnerships.headingPart2}
+          lead={t.partnerships.subtitle}
         />
-
-        <Carousel sx={revealSx(visible, 300)}>
-          {PARTNERSHIPS.map((p, i) => (
-            <Box
-              key={i}
-              sx={{
-                flex: '0 0 auto',
-                // Em telas largas 2 cards deixavam a arte gigante e a linha vazia;
-                // 3 preenchem exatamente a fileira de parceiros.
-                width: { xs: '85%', sm: '50%', lg: '33.333%' },
-                scrollSnapAlign: 'start',
-                px: 1.5,
-                display: 'flex',
-                flexDirection: 'column',
-              }}
-            >
-              <PartnershipCard p={p} />
-            </Box>
-          ))}
-        </Carousel>
-
-      </Box>
-    </Box>
+        <Reveal delay={0.1}>
+          <Carousel label={t.nav.partnerships} slideWidth={{ xs: '88%', sm: '82%', md: '74%', lg: '66%' }} autoplayMs={6000}>
+            {PARTNERSHIPS.map((p) => (
+              <PartnerSlide key={p.name} p={p} />
+            ))}
+          </Carousel>
+        </Reveal>
+      </Container>
+    </Section>
   );
 }
