@@ -59,7 +59,7 @@ const pt_BR: Translations = {
     instagram: {
       title: 'Divulgação e Parceria',
       description: 'Alcance um público apaixonado pela boa relojoaria. O canal realiza divulgações no Instagram para marcas, lojas e lançamentos relacionados ao segmento com taxa negociável conforme o projeto.',
-      button: 'Fale no Instagram',
+      button: 'Seja nosso parceiro',
     },
     youtube: {
       title: 'Reviews e Conteúdo',
