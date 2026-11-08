@@ -59,7 +59,7 @@ const en: Translations = {
     instagram: {
       title: 'Promotion and Partnership',
       description: 'Reach an audience passionate about fine watchmaking. The channel promotes brands, stores, and launches on Instagram with a negotiable fee based on the project.',
-      button: 'Contact on Instagram',
+      button: 'Become our partner',
     },
     youtube: {
       title: 'Reviews and Content',
